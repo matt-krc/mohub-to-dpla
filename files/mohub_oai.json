@@ -1,0 +1,149 @@
+[
+    {
+        "institution": "Federal Reserve Bank of St. Louis",
+        "id": "frb",
+        "@d": "frbstl_fraser",
+        "url": "https://fraser.stlouisfed.org/oai/",
+        "schema": "mods",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": "MODS"
+    },
+    {
+        "institution": "Missouri State University",
+        "id": "msu",
+        "@id": "msu_all",
+        "url": "http://digitalcollections.missouristate.edu/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": ["JohnsonLib"],
+        "total": 9600,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Kansas City Public Library",
+        "id": "kcpl1",
+        "@id": "mdh_all",
+        "url": "https://pendergastkc.org/dpla-oai",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": 5681,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Kansas City Public Library",
+        "id": "kcpl2",
+        "@id": "mdh_all",
+        "url": "https://kchistory.org/oai",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": 20000,
+        "Record metadata schema": "MODS"
+    },
+    {
+        "institution": "University of Missouri - Kansas City",
+        "id": "umkc",
+        "@id": "umkc_dl",
+        "url": "https://dl.mospace.umsystem.edu/umkc/oai2",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": 24000,
+        "Record metadata schema": "MODS"
+    },
+    {
+        "institution": "Saint Louis Public Library",
+        "id": "stlpl",
+        "@id": "slpl_dl",
+        "url": "http://cdm17210.contentdm.oclc.org/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "State Historical Society of Missouri",
+        "id": "shsm",
+        "url": "http://cdm17228.contentdm.oclc.org/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Missouri Digital Heritage",
+        "id": "mdh",
+        "url": "http://cdm16795.contentdm.oclc.org/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Saint Louis University",
+        "id": "slu",
+        "@id_prefix": "missouri--urn:data.mohistory.org:slu_dl:oai:cdm.slu.edu",
+        "url": "http://cdm17321.contentdm.oclc.org/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": ["exorcism", "licenses"],
+        "total": 28000,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "University of Missouri - Saint Louis",
+        "id": "umsl",
+        "url": "https://dl.mospace.umsystem.edu/umsl/oai2",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": null
+    },
+    {
+        "institution": "Springfield - Greene County Library",
+        "id": "sgcl",
+        "url": "http://cdm16792.contentdm.oclc.org/oai/oai.php",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": null,
+        "Record metadata schema": null
+    },
+    {
+        "institution": "Washington University in Saint Louis",
+        "id": "wustl1",
+        "url": "http://repository.wustl.edu/catalog/oai",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": 25000,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Washington University in Saint Louis",
+        "id": "wustl2",
+        "url": "http://omeka.wustl.edu/omeka/oai-pmh-repository/request",
+        "schema": "oai_dc",
+        "include": null,
+        "exclude": [],
+        "total": 25000,
+        "Record metadata schema": "Dublin Core"
+    },
+    {
+        "institution": "Linda Hall Library",
+        "id": "lhl",
+        "url": "https://na02.alma.exlibrisgroup.com/view/oai/01LINDAHALL_INST/request",
+        "schema": "oai_qdc",
+        "include": ["DPLA_Digital_Bib_QDC"],
+        "exclude": [],
+        "total": 0,
+        "Record metadata schema": "Dublin Core"
+    }
+]
