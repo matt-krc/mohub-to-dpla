@@ -248,20 +248,7 @@ class OAI:
 
         return dpla_row
 
-    def get_institution_prefix(self, institution):
-        with open("./files/institution_identifiers.json", "r") as inf:
-            data = json.load(inf)
-
-        if institution in data:
-            if len(data[institution]) == 1:
-                return data[institution][0]
-            elif len(data[institution]) > 1:
-                raise Exception(f"Institution has more than one ID: {institution}")
-        else:
-            raise Exception(f"Institution doesn't have prefix: {institution}")
-
-
-    def parse(self, record, institution, metadata_prefix, institution_id, exclude):
+    def parse(self, record, institution, metadata_prefix, institution_id, institution_id_prefix, exclude):
         dpla_row = self.row_template()
 
         if not record.find('metadata') or not record.find('header'):
@@ -282,7 +269,7 @@ class OAI:
             "metadata": metadata,
             "institution": institution,
             "institution_id": institution_id,
-            "institution_prefix": self.get_institution_prefix(institution)
+            "institution_prefix": institution_id_prefix
         }
 
         record['header'] = self.clean_fields(record['header'])
@@ -399,9 +386,12 @@ class OAI:
         outdf = pd.DataFrame(out)
         outdf.to_csv(outpath, index=False)
 
+    def get_datadump(self, url):
+        res = requests.get(url)
+        return res.json()['records']
 
 
-    def harvest(self, url, metadata_prefix, institution, institution_id, exclude, include=None):
+    def harvest(self, url, metadata_prefix, institution, institution_id, institution_id_prefix, exclude, include=None):
         """
         Loops through OAI feed and returns DPLA-formatted metadata
 
@@ -457,7 +447,7 @@ class OAI:
             # print(resumption_token)
             params['resumptionToken'] = resumption_token
             for record in records:
-                out_row = self.parse(record, institution, metadata_prefix, institution_id, exclude)
+                out_row = self.parse(record, institution, metadata_prefix, institution_id, institution_id_prefix, exclude)
                 if out_row:
                     out.append(out_row)
                 else:
