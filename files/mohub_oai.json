@@ -2,7 +2,6 @@
     {
         "institution": "Federal Reserve Bank of St. Louis",
         "id": "frb",
-        "@id": "frbstl_fraser",
         "@id_prefix": "missouri--urn:data.mohistory.org:frbstl_fraser:oai:fraser.stlouisfed.org:title",
         "url": "https://fraser.stlouisfed.org/oai/",
         "metadata_prefix": "mods",
@@ -12,7 +11,6 @@
     {
         "institution": "Missouri State University",
         "id": "msu",
-        "@id": "msu_all",
         "@id_prefix": "missouri--urn:data.mohistory.org:msu_all:oai:digitalcollections.missouristate.edu",
         "url": "http://digitalcollections.missouristate.edu/oai/oai.php",
         "metadata_prefix": "oai_dc",
@@ -22,7 +20,6 @@
     {
         "institution": "Kansas City Public Library",
         "id": "kcpl1",
-        "@id": "mdh_all",
         "@id_prefix": "missouri--urn:data.mohistory.org:kcpl_pdr:oai:pendergastkc.org",
         "url": "https://pendergastkc.org/dpla-oai",
         "metadata_prefix": "oai_dc",
@@ -32,7 +29,6 @@
     {
         "institution": "Kansas City Public Library",
         "id": "kcpl2",
-        "@id": "mdh_all",
         "@id_prefix": "missouri--urn:data.mohistory.org:kcpl_pdr:oai:pendergastkc.org",
         "url": "https://kchistory.org/oai",
         "metadata_prefix": "oai_dc",
@@ -42,7 +38,6 @@
     {
         "institution": "University of Missouri - Kansas City",
         "id": "umkc",
-        "@id": "umkc_dl",
         "@id_prefix": "missouri--urn:data.mohistory.org:umkc_dl:oai:dl.mospace.umsystem.edu/umkc/",
         "url": "https://dl.mospace.umsystem.edu/umkc/oai2",
         "metadata_prefix": "oai_dc",
@@ -52,7 +47,6 @@
     {
         "institution": "Saint Louis Public Library",
         "id": "stlpl",
-        "@id": "slpl_dl",
         "@id_prefix": "missouri--urn:data.mohistory.org:slpl_dl:oai:collections.slpl.org",
         "url": "http://cdm17210.contentdm.oclc.org/oai/oai.php",
         "metadata_prefix": "oai_dc",
@@ -128,7 +122,7 @@
         "@id_prefix": "missouri--urn:data.mohistory.org:",
         "url": "https://na02.alma.exlibrisgroup.com/view/oai/01LINDAHALL_INST/request",
         "metadata_prefix": "oai_dc",
-        "include": ["DPLA_Digital_Bib_DC"],
+        "include": "DPLA_Digital_Bib_DC",
         "exclude": []
     },
     {

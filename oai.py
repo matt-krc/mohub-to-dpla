@@ -4,118 +4,282 @@ from bs4 import BeautifulSoup
 import sys
 import maps
 import time
-from iso639 import languages
-from dateutil import parser
-from urllib.parse import urlparse
-import pandas as pd
-
-
-def parse_date(datestr):
-    try:
-        parsed = parser.parse(datestr)
-    except ValueError as e:
-        print(f"{datestr} could not be parsed as a date. Skipping.")
-        return False
-
-    return parsed.strftime("%B %-d, %Y")
-
-
-def get_metadata(field, metadata):
-    stack = field.split('.')
-    _metadata = metadata
-    for s in stack:
-        if s not in _metadata:
-            return False
-        _metadata = _metadata[s]
-    out = []
-
-    for m in _metadata:
-        out.extend([" ".join(a.strip().split()) for a in m.split(";") if a])
-    return out
-
-
-def make_list_flat(l):
-    flist = []
-    flist.extend([l]) if (type(l) is not list) else [flist.extend(make_list_flat(e)) for e in l]
-    return flist
-
-def split_values(row):
-    '''
-    Splits values that have semicolons for certain fields.
-    '''
-    fields_to_split = [
-        'subject',
-        'date',
-        'language'
-    ]
-    for field, value in row.items():
-        if field not in fields_to_split:
-            continue
-        outval = []
-        for v in value:
-            outval.extend([_v.strip() for _v in v.split(";") if _v != ''])
-        row[field] = outval
-
-    return row
+import utils
 
 
 class OAI:
+    def __init__(self, row, verbose=False):
+        self.url = row['url']
+        self.metadata_prefix = row['metadata_prefix']
+        self.institution = row['institution']
+        self.institution_id = row['id']
+        self.institution_id_prefix = row['@id_prefix']
+        self.include = row['include']
+        self.exclude = row['exclude']
+        self.verbose = verbose
 
-    def __init__(self, verbose=False):
-        self.verbose = False
+    def oai_request(self,  verb):
+        """
+        Instatiates an OAI feed request, given an OAI verb.
 
-    def generate_cdm_thumbnail(self, url):
+        :param verb:
+        :return:
+        """
+        params = {
+            "verb": verb
+        }
         try:
-            collection = url.split("/")[url.split("/").index("collection") + 1]
-        except ValueError as e:
-            print(url)
+            res = requests.get(self.url, params=params)
+        except requests.exceptions.MissingSchema as e:
+            return False
+        soup = BeautifulSoup(res.content, 'html.parser')
+
+        return soup
+
+    def get_metadata_prefix(self, url):
+        """
+        Returns an OAI feed's available metadata prefixes.
+
+        :param url: string
+        :return: list of metadata prefixes available
+        """
+        verb = "ListMetadataFormats"
+        soup = self.oai_request(url, verb)
+        if not soup:
+            print("Missing schema error for: {}".format(url))
+            return False
+        metadata_prefix = [m.getText() for m in soup.find_all('metadataprefix')]
+
+        return metadata_prefix
+
+    def get_institution_name(self):
+        """
+        For a given OAI feed, return the institution's name as stored in the OAI feed's 'Identify' endpoint.
+
+        :param url: root url for an OAI feed
+        :return: string name of the institution
+        """
+
+        verb = "Identify"
+        soup = self.oai_request(self.url, verb)
+        try:
+            name = soup.find('repositoryname').getText()
+        except AttributeError as e:
             raise
-        record_id = url.split("/")[-1]
-        o = urlparse(url)
-        base = "{}://{}".format(o.scheme, o.netloc)
-        thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
+        return name
 
-        return thumbnail
+    def list_sets(self, url):
+        """
+        For a given OAI feed, request the ListSets endpoint and return a list of sets and set IDs
 
+        :param url: root url for an OAI feed
+        :return: list of sets for a given OAI feed
+        """
+        verb = "ListSets"
+        soup = self.oai_request(url, verb)
+        sets = [{"setSpec": set["setSpec"], "setName": set["setName"]} for set in soup.find_all("set")]
 
-    def parse_language(self, language_list):
-        outlist = []
-        delimiters = ['/', ',', ';']
-        ll = []
-        delimited = False
-        for language in language_list:
-            for d in delimiters:
-                if d not in language:
-                    continue
-                delimited = True
-                for l in language.split(d):
-                    if l.strip() not in ll:
-                        ll.append(l.strip())
-            if not delimited:
-                ll.append(language.strip())
-            delimited = False
+        return sets
 
-        language_list = ll
-        for language in language_list:
-            language_found = False
-            codes = ['name', 'part3', 'part2b', 'part2t', 'part1']
-            for code in codes:
-                if code == 'name':
-                    language = language.capitalize()
-                else:
-                    language = language.lower()
-                try:
-                    lng = eval("languages.get({}='{}')".format(code, language))
-                    outlist.append({f"iso639_3": lng.part3, "name": lng.name})
-                    language_found = True
+    def crawl(self):
+        out = []
+        url = self.url
+        metadata_prefix = self.metadata_prefix
+        resumption_token = True
+        records = True
+        params = {
+            "verb": "ListRecords",
+            "metadataPrefix": self.metadata_prefix
+        }
+        # TODO: If Include is a list it needs to be iterated through
+        if self.include:
+            params["set"] = self.include
+
+        timeouts = 0
+        skipped = 0
+
+        while records and resumption_token:
+            sys.stdout.write("\r{} records added".format(len(out)))
+            sys.stdout.flush()
+            # Some feeds are touchy about requesting too fast, so we pause for 5 seconds if a request error is encountered.
+            try:
+                res = requests.get(url, params=params)
+            except requests.exceptions.ConnectionError as e:
+                timeouts += 1
+                print("\nRequest timed out. Waiting 5 seconds and trying again. Attempt {}".format(timeouts))
+                if timeouts == 5:
+                    print("\nRequest has timed out 5 times. Stopping harvest.")
                     break
-                except (KeyError, SyntaxError) as e:
-                    continue
-            if not language_found:
-                if self.verbose:
-                    print("WARNING: Language {} could not be converted to an ISO 639.3 code".format(language))
+                continue
+            if res.status_code // 100 == 5:
+                print("\nServer error. Waiting 5 seconds and trying request again.")
+                print(res.status_code)
+                time.sleep(5)
+                continue
 
-        return outlist
+            # OAI doesn't like it if you're using a resumption token with a metadataPrefix or set param, so we delete it after initial request
+            if 'metadataPrefix' in params:
+                del params['metadataPrefix']
+            if 'set' in params:
+                del params['set']
+
+            soup = BeautifulSoup(res.content, 'html.parser')
+
+            records = soup.find_all('record')
+            try:
+                resumption_token = soup.find('resumptiontoken').getText()
+            except AttributeError as e:
+                resumption_token = None
+            params['resumptionToken'] = resumption_token
+            for record in records:
+                if not record.find('metadata') or not record.find('header'):
+                    return False
+                # TODO: figure out if metadata prefix can be inferred from element
+                if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
+                    metadata_prefix = '{}:dc'.format(metadata_prefix)
+                decorators = {
+                    "metadata_prefix": metadata_prefix,
+                    "institution": self.institution,
+                    "institution_id": self.institution_id,
+                    "institution_id_prefix": self.institution_id_prefix,
+                    "exclude": self.exclude
+                }
+                out_record = Record(record, decorators)
+                if out_record.is_deleted():
+                    return False
+                out_record = out_record.parse()
+                if out_record:
+                    out.append(out_record)
+                else:
+                    skipped += 1
+        print(f"\n{skipped} items were skipped.")
+        return out
+
+
+class Record:
+    def __init__(self, record, decorators):
+        self.oai_record = record
+        self.header = record.find('header')
+        self.metadata_prefix = decorators['metadata_prefix']
+        self.metadata = record.find('metadata').find(self.metadata_prefix)
+        self.record = {
+                    "header": self.header,
+                    "metadata": self.metadata,
+                    "institution": decorators['institution'],
+                    "institution_id": decorators['institution_id'],
+                    "institution_prefix": decorators['institution_id_prefix'],
+                    "exclude": decorators['exclude']
+                }
+
+    def parse(self):
+        record = self.record
+        institution_id = record['institution_id']
+        dpla_row = self.record_template()
+        record['header'] = self.clean_fields(record['header'])
+
+        if 'setspec' in record['header']:
+            if record['header']['setspec'][0] in record['exclude']:
+                return False
+
+        record['metadata'] = self.clean_fields(record['metadata'])
+
+        if 'cdm' in record['header']['identifier'][0] or institution_id == 'msu':
+            metadata = maps.cdm(record)
+        elif 'omeka' in record['header']['identifier'][0]:
+            metadata = maps.omeka_wustl(record)
+        elif institution_id == "umkc" or institution_id == "umsl":
+            metadata = maps.um(record)
+        elif "wustl" in institution_id:
+            metadata = maps.wustl(record)
+        elif 'fraser' in record['header']['identifier'][0]:
+            metadata = maps.fraser(record)
+        elif 'kcpl1' in institution_id:
+            metadata = maps.kcpl1(record)
+        elif 'kcpl2' in institution_id:
+            metadata = maps.kcpl2(record)
+        elif 'lhl' in institution_id:
+            metadata = maps.lhl(record)
+        else:
+            raise Exception("No metadata mapping found")
+
+        out_row = self.map_to_dpla(metadata, dpla_row)
+
+        return out_row
+
+    def map_to_dpla(self, metadata, dpla_row):
+        """
+        Maps institution-specific formatted metadata to a DPLA-formatted record
+
+        :param metadata:
+        :param dpla_row:
+        :return:
+        """
+        dpla_row["isShownAt"] = metadata["url"]
+        dpla_row["hasView"]["@id"] = metadata["url"]
+        dpla_row["dataProvider"] = metadata["institution"]
+        dpla_row["@id"] = metadata["@id"]
+        dpla_row["object"] = metadata["thumbnail"]
+        dpla_row["sourceResource"] = metadata["sourceResource"]
+
+        return dpla_row
+
+    def record_template(self):
+        """
+        Default record template for DPLA records
+
+        :return:
+        """
+        row = {
+            "@context": "http://dp.la/api/items/context",
+            "isShownAt": None,  # URL to object
+            "dataProvider": "",
+            "@type": "ore:Aggregation",
+            "hasView": {
+                "@id": None  # URL to object
+            },
+            "provider": {
+                "@id": "http://dp.la/api/contributor/missouri-hub",
+                "name": "Missouri Hub"
+            },
+            "object": None,  # thumbnail
+            "aggregatedCHO": "#sourceResource",
+            "sourceResource": {
+                "title": [],
+                "description": [],
+                "subject": [],
+                "temporal": [],
+                "rights": "",
+                "@id": "",  # OAI ID
+                "language": [
+                    {
+                        "iso639_3": "eng",
+                        "name": "English"
+                    }
+                ],
+                "stateLocatedIn": [
+                    {
+                        "name": "Missouri"
+                    }
+                ],
+                "format": "",
+                "identifier": [],
+                "creator": [],
+                "specType": []
+            },
+            "@id": ""
+        }
+
+        return row
+
+    def is_deleted(self):
+        header = self.header
+        if header.has_attr('status'):
+            if header['status'] == 'deleted':
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def clean_fields(self, element):
         """
@@ -162,295 +326,9 @@ class OAI:
                 else:
                     row[el.name].extend(self.clean_fields(el))
             elif el.name == 'subject' and type(self.clean_fields(el)) == dict:
-                row[el.name] = make_list_flat([v for k, v in self.clean_fields(el).items()])
+                row[el.name] = utils.make_list_flat([v for k, v in self.clean_fields(el).items()])
 
             else:
                 row[el.name] = self.clean_fields(el)
 
         return row
-
-    def row_template(self):
-        '''
-        Return default values for a record
-        
-        '''
-        row = {
-            "@context": "http://dp.la/api/items/context",
-            "isShownAt": None,  # URL to object
-            "dataProvider": "",
-            "@type": "ore:Aggregation",
-            "hasView": {
-                "@id": None  # URL to object
-            },
-            "provider": {
-                "@id": "http://dp.la/api/contributor/missouri-hub",
-                "name": "Missouri Hub"
-            },
-            "object": None,  # thumbnail
-            "aggregatedCHO": "#sourceResource",
-            "sourceResource": {
-                "title": [],
-                "description": [],
-                "subject": [],
-                "temporal": [],
-                "rights": "",
-                "@id": "",  # OAI ID
-                "language": [
-                    {
-                        "iso639_3": "eng",
-                        "name": "English"
-                    }
-                ],
-                "stateLocatedIn": [
-                    {
-                        "name": "Missouri"
-                    }
-                ],
-                "format": "",
-                "identifier": [],
-                "creator": [],
-                "specType": []
-            },
-            "@id": ""
-        }
-
-        return row
-
-    def is_deleted(self, header):
-        if header.has_attr('status'):
-            if header['status'] == 'deleted':
-                return True
-            else:
-                return False
-        else:
-            return False
-
-    def output_json(self, metadata):
-        with open('test.json', 'w') as outf:
-            json.dump(metadata, outf, indent=4)
-        print("Wrote example metadata to test.json")
-        sys.exit()
-
-    def map_to_dpla(self, metadata, dpla_row):
-        """
-        Maps institution-specific formatted metadata to a DPLA-formatted record
-
-        :param metadata:
-        :param dpla_row:
-        :return:
-        """
-        dpla_row["isShownAt"] = metadata["url"]
-        dpla_row["hasView"]["@id"] = metadata["url"]
-        dpla_row["dataProvider"] = metadata["institution"]
-        dpla_row["@id"] = metadata["@id"]
-        dpla_row["object"] = metadata["thumbnail"]
-        dpla_row["sourceResource"] = metadata["sourceResource"]
-
-        return dpla_row
-
-    def parse(self, record, institution, metadata_prefix, institution_id, institution_id_prefix, exclude):
-        dpla_row = self.row_template()
-
-        if not record.find('metadata') or not record.find('header'):
-            if self.verbose:
-                print("Either a header or metadata could not be found.")
-            return False
-
-        header = record.find('header')
-        if self.is_deleted(header):
-            return False
-
-        if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
-            metadata_prefix = '{}:dc'.format(metadata_prefix)
-        metadata = record.find('metadata').find(metadata_prefix)
-
-        record = {
-            "header": header,
-            "metadata": metadata,
-            "institution": institution,
-            "institution_id": institution_id,
-            "institution_prefix": institution_id_prefix
-        }
-
-        record['header'] = self.clean_fields(record['header'])
-
-        if 'setspec' in record['header']:
-            if record['header']['setspec'][0] in exclude:
-                return False
-
-        record['metadata'] = self.clean_fields(record['metadata'])
-
-        if 'cdm' in record['header']['identifier'][0] or institution_id == 'msu':
-            metadata = maps.cdm(record)
-        elif 'omeka' in record['header']['identifier'][0]:
-            metadata = maps.omeka_wustl(record)
-        elif institution_id == "umkc" or institution_id == "umsl":
-            metadata = maps.um(record)
-        elif "wustl" in institution_id:
-            metadata = maps.wustl(record)
-        elif 'fraser' in record['header']['identifier'][0]:
-            metadata = maps.fraser(record)
-        elif 'kcpl1' in institution_id:
-            metadata = maps.kcpl1(record)
-        elif 'kcpl2' in institution_id:
-            metadata = maps.kcpl2(record)
-        elif 'lhl' in institution_id:
-            metadata = maps.lhl(record)
-        else:
-            raise Exception("No metadata mapping found")
-
-        out_row = self.map_to_dpla(metadata, dpla_row)
-
-        return out_row
-
-    def get_urls(self, inf):
-        with open(inf, "r") as inf:
-            data = json.load(inf)
-        return [row['url'] for row in data if row['url']]
-
-    def oai_request(self, url, verb):
-        params = {
-            "verb": verb
-        }
-        try:
-            res = requests.get(url, params=params)
-        except requests.exceptions.MissingSchema as e:
-            return False
-        soup = BeautifulSoup(res.content, 'html.parser')
-
-        return soup
-
-    def get_metadata_prefix(self, url):
-        verb = "ListMetadataFormats"
-        soup = self.oai_request(url, verb)
-        if not soup:
-            print("Missing schema error for: {}".format(url))
-            return False
-        metadata_prefix = [m.getText() for m in soup.find_all('metadataprefix')]
-
-        # oai_dc or MODS is preferred schema
-        if 'oai_dc' in metadata_prefix:
-            metadata_prefix = 'oai_dc'
-        elif 'mods' in metadata_prefix:
-            metadata_prefix = 'mods'
-        else:
-            print("Cannot handle metadata for {}".format(url))
-            return False
-
-        return metadata_prefix
-
-    def get_institution(self, url):
-        verb = "Identify"
-        soup = self.oai_request(url, verb)
-        try:
-            name = soup.find('repositoryname').getText()
-        except AttributeError as e:
-            name = "Not found"
-        return name
-
-    def get_institution_sets(self, url):
-        verb = "ListSets"
-        soup = self.oai_request(url, verb)
-        sets = [{"setSpec": set["setSpec"], "setName": set["setName"]} for set in soup.find_all("set")]
-
-        return sets
-
-    def write_csv(self, data, outpath):
-        out = []
-        for row in data:
-            outrow = {}
-            outrow["url"] = row["isShownAt"]
-            outrow["dataProvider"] = row["dataProvider"]
-            outrow["thumbnail"] = row["object"]
-            outrow["dplaIdentififer"] = row["@id"]
-            for field, val in row["sourceResource"].items():
-                if field == "identifier":
-                    continue
-                if type(val) == list:
-                    if len(val) == 0:
-                        outrow[field] = ""
-                    elif field == "subject":
-                        outrow[field] = "|".join([subj["name"] for subj in val])
-                    elif field == "temporal":
-                        outrow["displayDate"] = val[0]["displayDate"]
-                    elif field == "language":
-                        outrow["languageCode"] = "|".join([l["iso639_3"] for l in val])
-                        outrow["language"] = "|".join([l["name"] for l in val])
-                    elif len(val) == 1:
-                        outrow[field] = val[0]
-                    elif len(val) > 1:
-                        outrow[field] = "|".join(val)
-                else:
-                    outrow[field] = val
-            out.append(outrow)
-        outdf = pd.DataFrame(out)
-        outdf.to_csv(outpath, index=False)
-
-    def get_datadump(self, url):
-        res = requests.get(url)
-        return res.json()['records']
-
-
-    def harvest(self, url, metadata_prefix, institution, institution_id, institution_id_prefix, exclude, include=None):
-        """
-        Loops through OAI feed and returns DPLA-formatted metadata
-
-        :param url: endpoint for the OAI feed
-        :param metadata_prefix: metadata prefix used in OAI feed
-        :return:
-        """
-
-        resumption_token = True
-        records = True
-        params = {
-            "verb": "ListRecords",
-            "metadataPrefix": metadata_prefix
-        }
-        if include:
-            params["set"] = include
-        out = []
-        timeouts = 0
-        skipped = 0
-
-        while records and resumption_token:
-            # print(f"{len(out)} records added.")
-            sys.stdout.write("\r{} records added".format(len(out)))
-            sys.stdout.flush()
-            try:
-                res = requests.get(url, params=params)
-            except requests.exceptions.ConnectionError as e:
-                timeouts += 1
-                print("\nRequest timed out. Waiting 5 seconds and trying again. Attempt {}".format(timeouts))
-                if timeouts == 5:
-                    print("\nRequest has timed out 5 times. Stopping harvest.")
-                    break
-                continue
-            if res.status_code // 100 == 5:
-                print("\nServer error. Waiting 5 seconds and trying request again.")
-                print(res.status_code)
-                time.sleep(5)
-                continue
-
-            # OAI doesn't like it if you're using a resumption token with a metadataPrefix or set param, so we delete it after initial request
-            if 'metadataPrefix' in params:
-                del params['metadataPrefix']
-            if 'set' in params:
-                del params['set']
-
-            soup = BeautifulSoup(res.content, 'html.parser')
-
-            records = soup.find_all('record')
-            try:
-                resumption_token = soup.find('resumptiontoken').getText()
-            except AttributeError as e:
-                resumption_token = None
-            # print(resumption_token)
-            params['resumptionToken'] = resumption_token
-            for record in records:
-                out_row = self.parse(record, institution, metadata_prefix, institution_id, institution_id_prefix, exclude)
-                if out_row:
-                    out.append(out_row)
-                else:
-                    skipped += 1
-        print(f"\n{skipped} items were skipped.")
-        return out

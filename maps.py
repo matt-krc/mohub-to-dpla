@@ -1,8 +1,8 @@
-import oai
+import utils
 
 
 def format_metadata(field, metadata, format="list"):
-    value = oai.get_metadata(field, metadata)
+    value = utils.get_metadata(field, metadata)
 
     # case 1: field doesn't exist, return either empty list or string
     if not value:
@@ -16,7 +16,7 @@ def format_metadata(field, metadata, format="list"):
 
     # case 3: language
     if field == 'language':
-        return oai.OAI().parse_language(value)
+        return utils.parse_language(value)
 
     # handle title fields that get split
     if field == "title" or field == "date":
@@ -60,6 +60,7 @@ def default_row_oai_dc(oai_row, url, thumbnail=""):
 
     return metadata
 
+
 def cdm(oai_row):
     metadata = oai_row["metadata"]
     header = oai_row["header"]
@@ -86,7 +87,7 @@ def cdm(oai_row):
                                  "when publishing or otherwise distributing materials within the collection."
 
     url = metadata["identifier"][-1]
-    thumbnail = oai.OAI().generate_cdm_thumbnail(metadata["identifier"][-1])
+    thumbnail = utils.generate_cdm_thumbnail(metadata["identifier"][-1])
 
     metadata = default_row_oai_dc(oai_row, url, thumbnail)
 
