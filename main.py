@@ -1,57 +1,9 @@
 import json
-import time
 import os
-from glob import glob
-from datetime import datetime, timedelta
+from datetime import datetime
 from oai import OAI
-import sys
 import argparse
 import utils
-
-def write_files(out, inst_id):
-    outpath = f"./files/institutions/{inst_id}.json"
-    with open(outpath, "w") as outf:
-        json.dump(out, outf, indent=4)
-
-    print(f"\n{len(out)} records written to {inst_id}.json")
-
-def create_csvs(institution="*"):
-    json_files = glob("./files/institutions/{}.json".format(institution))
-    for file in json_files:
-        print(file)
-        with open(file, "r") as inf:
-            data = json.load(inf)
-        OAI().write_csv(data, file.replace(".json",".csv"))
-
-def compile():
-    json_files = glob("./files/institutions/*.json")
-    print("Compiling...")
-    out = []
-    for file in json_files:
-        print(file)
-        with open(file, "r") as inf:
-            data = json.load(inf)
-        out.extend(data)
-        inf.close()
-    datestr = datetime.now().strftime("%Y_%m_%d")
-    outfn = "./files/ingests/mohub_ingest_{}.json".format(datestr)
-    with open(outfn, "w") as outf:
-        json.dump(out, outf, indent=4)
-    # finish by writing to jsonl, as DPLA prefers
-    with open(outfn + "l", "w") as outf:
-        for line in out:
-            json.dump(line, outf)
-            outf.write('\n')
-    print("Total: {}".format(len(out)))
-    print("Wrote ingest file to {}".format(outfn))
-
-def get_previous(institution, outfn):
-    with open("./files/mohub_dpla.json", "r") as inf:
-        data = json.load(inf)
-    filtered = [d for d in data if d['dataProvider'] == institution]
-    with open("./files/institutions/{}".format(outfn), "w") as outf:
-        json.dump(filtered, outf, indent=4)
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -69,7 +21,7 @@ def main():
 
     # If we only want to compile existing data files into combined file, set this argument.
     if args.compile_only:
-        compile()
+        utils.compile()
         return True
 
     """
@@ -94,8 +46,12 @@ def main():
     if not os.path.isdir('./files/institutions'):
         os.mkdir('./files/institutions')
 
+    report = {
+        "institutions": {}
+    }
+    total = 0
+
     for row in data:
-        out = []
         url = row['url']
         institution = row['institution']
         metadata_prefix = row['metadata_prefix']
@@ -105,11 +61,9 @@ def main():
                 continue
 
         # In order not to crawl redundantly, by default we skip crawls that have already taken place in the past 24 hours
-        if not args.ignore_time and os.path.exists(f"./files/institutions/{row['id']}.json"):
-            now = datetime.now()
-            if now-timedelta(hours=24) <= datetime.fromtimestamp(os.path.getmtime(f"./files/institutions/{row['id']}.json")) <= now:
-                print(f"{institution} has been crawled less than 24 hours ago. Continuing")
-                continue
+        if utils.crawled_recently(row['id']) and not args.ignore_time:
+            print("{} has been crawled in less than 24 hours, continuing.".format(institution))
+            continue
 
         feed = OAI(row)
         print(institution)
@@ -119,18 +73,31 @@ def main():
         if metadata_prefix == 'data_dump':
             metadata = utils.get_datadump(url)
         else:
-            metadata = feed.crawl()
+            metadata, skipped = feed.crawl()
 
-        out.extend(metadata)
-        write_files(out, row["id"])
+        report['institutions'][row['id']] = {
+            "total": len(metadata),
+            "skipped": skipped
+        }
+        total += len(metadata)
+
+        utils.write_file("files/institutions/", metadata, row["id"])
+
+    report['total'] = total
+    report['crawled'] = '*' if not args.institutions else args.institutions
+    outp = "files/reports/report_{}.json".format(datetime.now().strftime("%Y%m%d%H%M%S"))
+    with open(outp, "w") as outf:
+        json.dump(report, outf, indent=4)
+    print("Report saved to {}".format(outp))
+
     if args.csv:
         if args.institutions:
             for i in args.institutions:
-                create_csvs(i)
+                utils.generate_csvs(i)
         else:
-            create_csvs()
+            utils.generate_csvs()
     if args.compile:
-        compile()
+        utils.compile()
 
 
 if __name__ == "__main__":

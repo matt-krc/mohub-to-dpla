@@ -6,5 +6,6 @@ files/*.xlsx
 files/mappings
 files/ingests
 files/institutions/*
+files/reports/*
 __pycache__/
 .DS_Store

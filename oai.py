@@ -153,7 +153,7 @@ class OAI:
                 else:
                     skipped += 1
         print(f"\n{skipped} items were skipped.")
-        return out
+        return out, skipped
 
 
 class Record:
@@ -183,6 +183,7 @@ class Record:
 
         record['metadata'] = self.clean_fields(record['metadata'])
 
+        # TODO: Figure out a better way to do this
         if 'cdm' in record['header']['identifier'][0] or institution_id == 'msu':
             metadata = maps.cdm(record)
         elif 'omeka' in record['header']['identifier'][0]:
