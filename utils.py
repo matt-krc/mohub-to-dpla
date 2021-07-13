@@ -3,6 +3,59 @@ import pandas as pd
 import requests
 from iso639 import languages
 from urllib.parse import urlparse
+import json
+from glob import glob
+from datetime import datetime, timedelta
+import os
+
+
+def compile():
+    """
+    Compiles all crawled files into one JSONL file to send off to DPLA
+
+    :return:
+    """
+    json_files = glob("./files/institutions/*.json")
+    print("Compiling...")
+    out = []
+    for file in json_files:
+        print(file)
+        with open(file, "r") as inf:
+            data = json.load(inf)
+        out.extend(data)
+        inf.close()
+    datestr = datetime.now().strftime("%Y_%m_%d")
+    outfn = "./files/ingests/mohub_ingest_{}.json".format(datestr)
+    with open(outfn, "w") as outf:
+        json.dump(out, outf, indent=4)
+    # finish by writing to jsonl, as DPLA prefers
+    with open(outfn + "l", "w") as outf:
+        for line in out:
+            json.dump(line, outf)
+            outf.write('\n')
+    print("Total: {}".format(len(out)))
+    print("Wrote ingest file to {}".format(outfn))
+
+def write_file(out_path, out_data, id):
+    out_path = out_path if out_path[-1] == '/' else out_path + '/'
+    with open("{}{}.json".format(out_path, id), "w") as outf:
+        json.dump(out_data, outf, indent=4)
+
+    print(f"\n{len(out_data)} records written to {id}.json")
+
+def generate_csvs(institution="*"):
+    """
+    Generates CSVs for JSON files, for human-readability purposes
+
+    :param institution:
+    :return:
+    """
+    json_files = glob("./files/institutions/{}.json".format(institution))
+    for file in json_files:
+        print(file)
+        with open(file, "r") as inf:
+            data = json.load(inf)
+        write_csv(data, file.replace(".json",".csv"))
 
 def get_metadata(field, metadata):
     """
@@ -176,3 +229,11 @@ def get_datadump(url):
     res = requests.get(url)
     return res.json()['records']
 
+def crawled_recently(id):
+    if not os.path.exists("files/institutions/{}.json".format(id)):
+        return False
+    now = datetime.now()
+    if now - timedelta(hours=24) <= datetime.fromtimestamp(
+                os.path.getmtime("./files/institutions/{}.json".format(id))) <= now:
+        return True
+    return False
