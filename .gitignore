@@ -4,6 +4,7 @@ files/*.json
 files/*.xlsx
 !files/mohub_oai.json
 files/mappings
+files/ingests
 files/institutions/*
 __pycache__/
 .DS_Store

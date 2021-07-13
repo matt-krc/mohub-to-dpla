@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from oai import OAI
 import sys
 import argparse
-
+import utils
 
 def write_files(out, inst_id):
     outpath = f"./files/institutions/{inst_id}.json"
@@ -37,7 +37,7 @@ def compile():
     outfn = "./files/ingests/mohub_ingest_{}.json".format(datestr)
     with open(outfn, "w") as outf:
         json.dump(out, outf, indent=4)
-    # additionally, write to jsonl, as DPLA prefers
+    # finish by writing to jsonl, as DPLA prefers
     with open(outfn + "l", "w") as outf:
         for line in out:
             json.dump(line, outf)
@@ -85,14 +85,20 @@ def main():
     }
     """
     infile = "./files/mohub_oai.json"
-
     with open(infile, "r") as inf:
         data = json.load(inf)
+        
+    if not os.path.isdir('./files/ingests'):
+        os.mkdir('./files/ingests')
+
+    if not os.path.isdir('./files/institutions'):
+        os.mkdir('./files/institutions')
 
     for row in data:
         out = []
         url = row['url']
         institution = row['institution']
+        metadata_prefix = row['metadata_prefix']
 
         if args.institutions:
             if row['id'] not in args.institutions:
@@ -105,29 +111,16 @@ def main():
                 print(f"{institution} has been crawled less than 24 hours ago. Continuing")
                 continue
 
-        if not url:
-            # TODO: this was used to gather data for Missouri History Museum, which now has a data dump instead.
-            # We can probably delete
-            print(f"No OAI feed for {institution}. Using previous ingest data.")
-            get_previous(institution, row["id"] + ".json")
-            continue
-
-        metadata_prefix = row["metadata_prefix"]
+        feed = OAI(row)
         print(institution)
         print(url)
 
         # Some institutions have opted to provide a data dump rather than an OAI feed.
         if metadata_prefix == 'data_dump':
-            metadata = OAI().get_datadump(url)
+            metadata = utils.get_datadump(url)
         else:
-            if row["include"]:
-                for include_set in row["include"]:
-                    metadata = OAI().harvest(url, metadata_prefix, institution, row["id"], row['@id_prefix'], row["exclude"], include_set)
-                    out.extend(metadata)
-                write_files(out, row["id"])
-                continue
+            metadata = feed.crawl()
 
-            metadata = OAI().harvest(url, metadata_prefix, institution, row["id"], row['@id_prefix'], row["exclude"])
         out.extend(metadata)
         write_files(out, row["id"])
     if args.csv:
