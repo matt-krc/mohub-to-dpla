@@ -8,4 +8,5 @@ files/ingests
 files/institutions/*
 files/reports/*
 __pycache__/
+venv/*
 .DS_Store
