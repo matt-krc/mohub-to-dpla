@@ -7,5 +7,7 @@ files/mappings
 files/ingests
 files/institutions/*
 files/reports/*
+venv/*
+files/mohub_oai.json
 __pycache__/
 .DS_Store
