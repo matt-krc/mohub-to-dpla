@@ -4,19 +4,16 @@ from datetime import datetime
 from oai import OAI
 import argparse
 import utils
-<<<<<<< Updated upstream:main.py
-=======
 import requests
->>>>>>> Stashed changes:src/main.py
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--institutions', '-i', nargs='*',
                         help="If argument is set, specifies specific institutions to crawl.", required=False)
     parser.add_argument('--ignore_time', '-ig', default=False,
-                        action="store_true", help="If set, ignores whether data already harvested recently.")
+                        action="store_true", help="If set, ignores whether data has been harvested in the past 24 hours already.")
     parser.add_argument('--csv', '-csv', default=False,
-                        action="store_true", help="If set, generates accompanying CSV files.")
+                        action="store_true", help="If set, converts JSON output to CSV.")
     parser.add_argument('--compile', '-c', default=False,
                         help="If set, compiles all data files into one.", action="store_true")
     parser.add_argument('--compile_only', '-co', default=False,
@@ -73,6 +70,7 @@ def main():
             metadata = data['records']
 
         else:
+            # Create OAI object based on input data
             feed = OAI(row)
 
             # In order not to crawl redundantly, by default we skip crawls that have already taken place in the past 24 hours
