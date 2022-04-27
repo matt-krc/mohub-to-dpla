@@ -15,7 +15,12 @@ def compile():
 
     :return:
     """
+<<<<<<< Updated upstream:utils.py
     json_files = glob("./files/institutions/*.json")
+=======
+    # TODO: Upload compiled file to Google Drive directly
+    json_files = glob("./files/institutions/**/*.json")
+>>>>>>> Stashed changes:src/utils.py
     print("Compiling...")
     out = []
     for file in json_files:
@@ -36,12 +41,14 @@ def compile():
     print("Total: {}".format(len(out)))
     print("Wrote ingest file to {}".format(outfn))
 
+
 def write_file(out_path, out_data, id):
     out_path = out_path if out_path[-1] == '/' else out_path + '/'
     with open("{}{}.json".format(out_path, id), "w") as outf:
         json.dump(out_data, outf, indent=4)
 
     print(f"\n{len(out_data)} records written to {id}.json")
+
 
 def generate_csvs(institution="*"):
     """
@@ -50,12 +57,13 @@ def generate_csvs(institution="*"):
     :param institution:
     :return:
     """
-    json_files = glob("./files/institutions/{}.json".format(institution))
+    json_files = glob("./files/institutions/{}/{}.json".format(institution, institution))
     for file in json_files:
         print(file)
         with open(file, "r") as inf:
             data = json.load(inf)
         write_csv(data, file.replace(".json",".csv"))
+
 
 def get_metadata(field, metadata):
     """
@@ -79,6 +87,7 @@ def get_metadata(field, metadata):
         out.extend([" ".join(a.strip().split()) for a in m.split(";") if a])
     return out
 
+
 def generate_cdm_thumbnail(url):
     try:
         collection = url.split("/")[url.split("/").index("collection") + 1]
@@ -91,6 +100,7 @@ def generate_cdm_thumbnail(url):
     thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
 
     return thumbnail
+
 
 def parse_language(language_list):
     outlist = []
@@ -127,6 +137,7 @@ def parse_language(language_list):
 
     return outlist
 
+
 def parse_date(datestr):
     """
     Parses a string that may or may not be able to be converted to a datetime object.
@@ -143,6 +154,7 @@ def parse_date(datestr):
         return False
 
     return parsed.strftime("%B %-d, %Y")
+
 
 def make_list_flat(l):
     """
@@ -230,10 +242,30 @@ def get_datadump(url):
     return res.json()['records']
 
 def crawled_recently(id):
-    if not os.path.exists("files/institutions/{}.json".format(id)):
+    if not os.path.exists("files/institutions/{}/{}.json".format(id, id)):
         return False
     now = datetime.now()
     if now - timedelta(hours=24) <= datetime.fromtimestamp(
-                os.path.getmtime("./files/institutions/{}.json".format(id))) <= now:
+                os.path.getmtime("./files/institutions/{}/{}.json".format(id, id))) <= now:
         return True
     return False
+
+def return_count():
+    ingests = glob("files/ingests/*.json")
+    recent = sorted(ingests)[-1]
+    with open(recent, "r") as inf:
+        records = json.load(inf)
+    data_providers = {}
+    for record in records:
+        data_provider = record['dataProvider']
+        if "missouri digital heritage" in data_provider.lower():
+            data_provider = "Missouri Digital Heritage"
+        if data_provider in data_providers:
+            data_providers[data_provider] += 1
+        else:
+            data_providers[data_provider] = 1
+    inf.close()
+    data_providers = dict(sorted(data_providers.items(), key=lambda item: item[1], reverse=True))
+    print("Total: "+str(len(records)))
+    for provider, value in data_providers.items():
+        print(f"{provider}: {value}")

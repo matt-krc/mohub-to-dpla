@@ -64,22 +64,6 @@ def validate_data(file, dpla_data_file, validate_field):
 
 def main():
     files = glob("./files/institutions/*.json")
-    # weird_ones = [
-    #   'wustl1.json' - not in master data
-    #   'kcpl2.json' - One of KCPL's oai feeds is not currently in DPLA, the other is in DPLA, but broken
-    # ]
-    # passed = [
-    #   'frb.json',
-    #   'msu.json',
-    #   'slu.json',
-    #   'stlpl.json',
-    #   'mdh.json',
-    #   'umsl.json',
-    #   'shsm.json',
-    #   'umkc.json',
-    #   'wustl2.json',
-    #   'kcpl1.json'
-    # ]
     for file in files:
         print(file.split("/")[-1])
         validate_data(file, "./files/mohub_dpla_ids.json", "@id")

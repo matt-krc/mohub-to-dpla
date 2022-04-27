@@ -4,19 +4,24 @@ from datetime import datetime
 from oai import OAI
 import argparse
 import utils
+<<<<<<< Updated upstream:main.py
+=======
+import requests
+>>>>>>> Stashed changes:src/main.py
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--institutions', '-i', nargs='*',
                         help="If argument is set, specifies specific institutions to crawl.", required=False)
-    parser.add_argument('--ignore_time', '-g', default=False,
+    parser.add_argument('--ignore_time', '-ig', default=False,
                         action="store_true", help="If set, ignores whether data already harvested recently.")
     parser.add_argument('--csv', '-csv', default=False,
                         action="store_true", help="If set, generates accompanying CSV files.")
     parser.add_argument('--compile', '-c', default=False,
                         help="If set, compiles all data files into one.", action="store_true")
-    parser.add_argument('--compile_only', '-o', default=False,
+    parser.add_argument('--compile_only', '-co', default=False,
                         help="If set, script doesn't run a crawl, only compiles all data files into one.", action="store_true")
+    parser.add_argument('--count', default=False, help="Returns total amount of records from most recent ingest.", action="store_true")
     args = parser.parse_args()
 
     # If we only want to compile existing data files into combined file, set this argument.
@@ -24,6 +29,9 @@ def main():
         utils.compile()
         return True
 
+    if args.count:
+        utils.return_count()
+        return True
     """
     The main input file is a path to a JSON file containing an array of OAI endpoint URLs, along with additional institutional metadata:
     {
@@ -40,11 +48,11 @@ def main():
     with open(infile, "r") as inf:
         data = json.load(inf)
         
-    if not os.path.isdir('./files/ingests'):
-        os.mkdir('./files/ingests')
+    if not os.path.isdir('../files/ingests'):
+        os.mkdir('../files/ingests')
 
-    if not os.path.isdir('./files/institutions'):
-        os.mkdir('./files/institutions')
+    if not os.path.isdir('../files/institutions'):
+        os.mkdir('../files/institutions')
 
     report = {
         "institutions": {}
@@ -54,31 +62,34 @@ def main():
     for row in data:
         url = row['url']
         institution = row['institution']
-        metadata_prefix = row['metadata_prefix']
 
         if args.institutions:
             if row['id'] not in args.institutions:
                 continue
 
-        # In order not to crawl redundantly, by default we skip crawls that have already taken place in the past 24 hours
-        if utils.crawled_recently(row['id']) and not args.ignore_time:
-            print("{} has been crawled in less than 24 hours, continuing.".format(institution))
-            continue
+        if row['id'] == 'mhm':
+            url = row['url']
+            data = requests.get(url).json()
+            metadata = data['records']
 
-        feed = OAI(row)
-        print(institution)
-        print(url)
-
-        # Some institutions have opted to provide a data dump rather than an OAI feed.
-        if metadata_prefix == 'data_dump':
-            metadata = utils.get_datadump(url)
         else:
+            feed = OAI(row)
+
+            # In order not to crawl redundantly, by default we skip crawls that have already taken place in the past 24 hours
+            if utils.crawled_recently(row['id']) and not args.ignore_time:
+                print("{} has been crawled in less than 24 hours, continuing.".format(institution))
+                continue
+
+            print(institution)
+            print(url)
+
+            # Some institutions have opted to provide a data dump rather than an OAI feed.
             metadata, skipped = feed.crawl()
 
-        report['institutions'][row['id']] = {
-            "total": len(metadata),
-            "skipped": skipped
-        }
+            report['institutions'][row['id']] = {
+                "total": len(metadata),
+                "skipped": skipped
+            }
         total += len(metadata)
 
         utils.write_file("files/institutions/", metadata, row["id"])
