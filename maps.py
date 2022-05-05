@@ -1,5 +1,6 @@
-import utils
+# DEPRECATED: maps have been moved to record.py and map.py
 
+import utils
 
 def format_metadata(field, metadata, format="list"):
     value = utils.get_metadata(field, metadata)

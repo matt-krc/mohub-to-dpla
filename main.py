@@ -5,6 +5,13 @@ from oai import OAI
 import argparse
 import utils
 import requests
+import institutions
+
+if not os.path.isdir('files/ingests'):
+    os.mkdir('files/ingests')
+
+if not os.path.isdir('files/institutions'):
+    os.mkdir('files/institutions')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -14,8 +21,6 @@ def main():
                         action="store_true", help="If set, ignores whether data has been harvested in the past 24 hours already.")
     parser.add_argument('--csv', '-csv', default=False,
                         action="store_true", help="If set, converts JSON output to CSV.")
-    parser.add_argument('--compile', '-c', default=False,
-                        help="If set, compiles all data files into one.", action="store_true")
     parser.add_argument('--compile_only', '-co', default=False,
                         help="If set, script doesn't run a crawl, only compiles all data files into one.", action="store_true")
     parser.add_argument('--count', default=False, help="Returns total amount of records from most recent ingest.", action="store_true")
@@ -29,27 +34,8 @@ def main():
     if args.count:
         utils.return_count()
         return True
-    """
-    The main input file is a path to a JSON file containing an array of OAI endpoint URLs, along with additional institutional metadata:
-    {
-        "institution": // the name of the institution,
-        "id": // internal id for institution, used in the mapping functions,
-        "@id_prefix": // a prefix for the item @id field in the output metadata,
-        "url": // url to the root OAI endpoint, or data dump,
-        "metadata_prefix": // metadata prefix for OAI feed, to be used in constructing the OAI query. If set to 'data_dump', URL assumed to be downloaded as-is,
-        "include": // array listing collection names to be included in crawl. If set, only collections listed will be included, otherwise all collections assumed to be included,
-        "exclude": // array listing collection names to be excluded in crawl. If set, all but listed collections will be excluded
-    }
-    """
-    infile = "./files/mohub_oai.json"
-    with open(infile, "r") as inf:
-        data = json.load(inf)
-        
-    if not os.path.isdir('../files/ingests'):
-        os.mkdir('../files/ingests')
 
-    if not os.path.isdir('../files/institutions'):
-        os.mkdir('../files/institutions')
+    data = institutions.get()
 
     report = {
         "institutions": {}
@@ -105,8 +91,7 @@ def main():
                 utils.generate_csvs(i)
         else:
             utils.generate_csvs()
-    if args.compile:
-        utils.compile()
+    utils.compile()
 
 
 if __name__ == "__main__":

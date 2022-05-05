@@ -10,22 +10,14 @@ import sys
 class OAI:
     def __init__(self, row, verbose=False):
         self.verbose = verbose
-        # OAI initiator can either pass a preformed data object or a URL to an OAI endpoint
-        if type(row) == dict:
-            self.url = row['url']
-            self.metadata_prefix = row['metadata_prefix'] if 'metadata_prefix' in row else self.get_metadata_prefix()
-            self.institution = row['institution']
-            self.institution_id = row['id']
-            self.institution_id_prefix = row['@id_prefix']
-            self.include = row['include'] if 'include' in row else []
-            self.exclude = row['exclude'] if 'exclude' in row else []
-        # TODO: validate URL
-        else:
-            url = row
-            self.url = url
-            # self.metadata_prefix = self.get_metadata_prefix()
-            # self.institution = self.get_institution_name()
-
+        self.url = row['url']
+        self.metadata_prefix = row['metadata_prefix'] if 'metadata_prefix' in row else self.get_metadata_prefix()
+        self.institution = row['institution']
+        self.institution_id = row['id']
+        self.include = row['include'] if 'include' in row else []
+        self.exclude = row['exclude'] if 'exclude' in row else []
+        self.hub = row['hub'] if 'hub' in row else ""
+        self.institution_id_prefix = self.generate_id_prefix()
 
     def oai_request(self, verb):
         """
@@ -68,6 +60,65 @@ class OAI:
             metadata_prefix = metadata_prefixes[0]
 
         return metadata_prefix
+
+    def generate_id_prefix(self):
+        prefix_components = []
+        institution_id = self.institution_id
+
+        if self.hub == 'mohub':
+            prefix_components.append("missouri--urn")
+            prefix_components.append("data.mohistory.org")
+        elif self.hub == 'iowa':
+            prefix_components.append(f"iowa--urn")
+
+
+        if institution_id == 'frb':
+            id_snippet = 'frbstl_fraser'
+        elif institution_id == 'msu':
+            id_snippet = 'msu_all'
+        elif institution_id == 'kcpl1' or institution_id == 'kcpl2':
+            id_snippet = 'kcpl_pdr'
+        elif institution_id == 'umkc':
+            id_snippet = 'umkc_dl'
+        elif institution_id == 'stlpl':
+            id_snippet = 'slpl_dl'
+        elif institution_id == 'shsm':
+            id_snippet = '<collection>'
+        elif institution_id == 'mdh':
+            id_snippet = 'mdh_all'
+        elif institution_id == 'slu':
+            id_snippet = 'slu_dl'
+        elif institution_id == 'umsl':
+            id_snippet = 'umkc_dl'
+        elif institution_id == 'sgcl':
+            id_snippet = 'sgcl'
+        elif institution_id == 'wustl1' or institution_id == 'wustl2':
+            id_snippet = 'wustl_omeka'
+        else:
+            id_snippet = institution_id
+
+        prefix_components.append(id_snippet)
+
+        prefix_components.append("oai")
+
+        if institution_id == 'stlpl':
+            url_snippet = 'collections.slpl.org'
+        elif institution_id == 'slu':
+            url_snippet = 'cdm.slu.edu'
+        elif institution_id == 'wustl1':
+            url_snippet = 'omeka.wustl.edu'
+        elif institution_id == 'kcpl2':
+            url_snippet = 'pendergastkc.org'
+        elif institution_id == 'umkc' or institution_id == 'umsl':
+            url_snippet = "/".join([self.url.split("/")[2], self.url.split("/")[3]]) + "/"
+        else:
+            url_snippet = self.url.split("/")[2]
+        prefix_components.append(url_snippet)
+
+        if institution_id == 'frb':
+            prefix_components.append('title')
+
+        return ":".join(prefix_components)
 
     def identify(self):
         verb = "Identify"
@@ -169,7 +220,9 @@ class OAI:
                     "institution": self.institution,
                     "institution_id": self.institution_id,
                     "institution_id_prefix": self.institution_id_prefix,
-                    "exclude": self.exclude
+                    "exclude": self.exclude,
+                    "hub": self.hub,
+                    "oai_url": self.url
                 }
                 try:
                     out_record = Record(record, decorators)

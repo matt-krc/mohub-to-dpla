@@ -15,12 +15,8 @@ def compile():
 
     :return:
     """
-<<<<<<< Updated upstream:utils.py
-    json_files = glob("./files/institutions/*.json")
-=======
     # TODO: Upload compiled file to Google Drive directly
     json_files = glob("./files/institutions/**/*.json")
->>>>>>> Stashed changes:src/utils.py
     print("Compiling...")
     out = []
     for file in json_files:
