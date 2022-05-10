@@ -54,12 +54,7 @@ def main():
                 print("{} has been crawled in less than 24 hours, continuing.".format(institution))
                 continue
 
-            print(institution.name)
-            print(institution.url)
-
-            metadata, skipped = feed.crawl()
-
-        utils.write_file("files/institutions/", metadata, institution.id, institution.name, skipped)
+            feed.crawl()
 
     if args.csv:
         if args.institutions:

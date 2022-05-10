@@ -1,10 +1,9 @@
-import json
 import requests
 from bs4 import BeautifulSoup
 from record import Record
-import sys
 import time
 import sys
+import utils
 
 
 class OAI:
@@ -104,6 +103,8 @@ class OAI:
         return sets
 
     def crawl(self):
+        print(self.name)
+        print(self.id)
         out = []
         url = self.url
         metadata_prefix = self.metadata_prefix
@@ -203,4 +204,5 @@ class OAI:
                 print(f"{field}: {url}")
             sys.exit()
         print(f"\n{skipped} items were skipped.")
+        utils.write_file("files/institutions/", out, self.id, self.name, skipped)
         return out, skipped
