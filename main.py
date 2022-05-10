@@ -8,11 +8,6 @@ import requests
 import institutions
 import sys
 
-if not os.path.isdir('files/ingests'):
-    os.mkdir('files/ingests')
-
-if not os.path.isdir('files/institutions'):
-    os.mkdir('files/institutions')
 
 def main():
     parser = argparse.ArgumentParser()
