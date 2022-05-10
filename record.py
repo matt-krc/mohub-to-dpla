@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from map import Map
 import utils
+from urllib.parse import urlparse
 
 
 class Record:
@@ -12,7 +13,6 @@ class Record:
         self.institution: str = decorators['institution']
         self.institution_id: str = decorators['institution_id']
         self.institution_prefix: str = decorators['institution_id_prefix']
-        # self.institution_prefix: str = self.generate_id_prefix()
         self.exclude: str = decorators['exclude']
         self.oai_url: str = decorators['oai_url']
         self.parsed_record: dict = self.parse()
@@ -254,7 +254,7 @@ class Record:
             thumbnail = self.format_metadata("location.url_preview", metadata, "string")
         elif 'cdm' in header['identifier'][0] or institution_id == 'msu':
             url = metadata["identifier"][-1]
-            thumbnail = utils.generate_cdm_thumbnail(metadata["identifier"][-1])
+            thumbnail = self.generate_cdm_thumbnail(metadata["identifier"][-1])
         elif institution_id == 'wustl1':
             url = metadata["identifier"][0] if "identifier" in metadata else ""
             thumbnail = metadata["identifier"][1] if "identifier" in metadata else ""
@@ -331,3 +331,16 @@ class Record:
                 if field not in urls:
                     urls[field] = url
         return urls
+
+    def generate_cdm_thumbnail(self, url):
+        try:
+            collection = url.split("/")[url.split("/").index("collection") + 1]
+        except ValueError as e:
+            print(url)
+            raise
+        record_id = url.split("/")[-1]
+        o = urlparse(url)
+        base = "{}://{}".format(o.scheme, o.netloc)
+        thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
+
+        return thumbnail

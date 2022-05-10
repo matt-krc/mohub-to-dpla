@@ -103,7 +103,7 @@ class OAI:
         return sets
 
     def crawl(self):
-        print(self.name)
+        print(f"{self.name} ({self.id})")
         print(self.id)
         out = []
         url = self.url

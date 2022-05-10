@@ -1,7 +1,6 @@
 from dateutil import parser
 import pandas as pd
 import requests
-from urllib.parse import urlparse
 import json
 from glob import glob
 from datetime import datetime, timedelta
@@ -17,7 +16,7 @@ def get_data_files():
     institutions_data = institutions.get()
     files = []
     for institution in institutions_data:
-        files.append(f"{DATA_DIR}/{institution.id}/{institution.id}.json")
+        files.extend(glob(f"{DATA_DIR}/{institution.id}.json"))
     return files
 
 
@@ -68,7 +67,7 @@ def write_report(datetimestr):
 def write_file(out_path, metadata, id, name, skipped):
     out_data = {
         "institution": name,
-        "couht": len(metadata),
+        "count": len(metadata),
         "skipped": skipped,
         "records": metadata
     }
@@ -76,19 +75,16 @@ def write_file(out_path, metadata, id, name, skipped):
     with open("{}{}.json".format(out_path, id), "w") as outf:
         json.dump(out_data, outf, indent=4)
 
-    print(f"\n{len(out_data)} records written to {id}.json")
+    print(f"\n{len(metadata)} records written to {id}.json")
 
 
-def generate_csvs(institution="*"):
+def generate_csvs():
     """
     Generates CSVs for JSON files, for human-readability purposes
 
-    :param institution:
-    :return:
     """
-    json_files = glob("./files/institutions/{}/{}.json".format(institution, institution))
+    json_files = get_data_files()
     for file in json_files:
-        print(file)
         with open(file, "r") as inf:
             data = json.load(inf)
         write_csv(data['records'], file.replace(".json",".csv"))
@@ -115,20 +111,6 @@ def get_metadata(field, metadata):
     for m in _metadata:
         out.extend([" ".join(a.strip().split()) for a in m.split(";") if a])
     return out
-
-
-def generate_cdm_thumbnail(url):
-    try:
-        collection = url.split("/")[url.split("/").index("collection") + 1]
-    except ValueError as e:
-        print(url)
-        raise
-    record_id = url.split("/")[-1]
-    o = urlparse(url)
-    base = "{}://{}".format(o.scheme, o.netloc)
-    thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
-
-    return thumbnail
 
 
 def parse_language(language_list):

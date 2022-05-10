@@ -1,6 +1,3 @@
-import json
-import os
-from datetime import datetime
 from oai import OAI
 import argparse
 import utils
@@ -33,8 +30,6 @@ def main():
 
     institutions_data = institutions.get()
 
-    total = 0
-
     for institution in institutions_data:
         if args.institutions:
             if institution.id not in args.institutions:
@@ -54,18 +49,16 @@ def main():
                 print("{} has been crawled in less than 24 hours, continuing.".format(institution))
                 continue
 
+            # Crawl the feed and write output to JSON
             feed.crawl()
 
     if args.csv:
-        if args.institutions:
-            for i in args.institutions:
-                utils.generate_csvs(i)
-        else:
-            utils.generate_csvs()
+        utils.generate_csvs()
 
     if not args.institutions:
         # If crawling everything, generate compile output file and report
         utils.compile()
+
 
 if __name__ == "__main__":
     main()
