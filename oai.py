@@ -22,7 +22,7 @@ class OAI:
         print(f"Institution name: {self.name}")
         print(f"Institution ID: {self.id}")
         print(f"OAI feed URL: {self.url}")
-        print(f"Metadata prefix: {self.metadata_prefix}")
+        print(f"Metadata prefix: {self.metadata_prefix}\n")
 
     def oai_request(self, verb):
         """

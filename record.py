@@ -11,8 +11,8 @@ class Record:
         self.metadata: BeautifulSoup.element.Tag = self.record.find('metadata').find(self.metadata_prefix)
         self.institution: str = decorators['institution']
         self.institution_id: str = decorators['institution_id']
-        # self.institution_prefix: str = decorators['institution_id_prefix']
-        self.institution_prefix: str = self.generate_id_prefix()
+        self.institution_prefix: str = decorators['institution_id_prefix']
+        # self.institution_prefix: str = self.generate_id_prefix()
         self.exclude: str = decorators['exclude']
         self.oai_url: str = decorators['oai_url']
         self.parsed_record: dict = self.parse()
