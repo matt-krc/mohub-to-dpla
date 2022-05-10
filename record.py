@@ -13,7 +13,7 @@ class Record:
         self.institution_id: str = decorators['institution_id']
         # self.institution_prefix: str = decorators['institution_id_prefix']
         self.institution_prefix: str = self.generate_id_prefix()
-        self.exclude: str = decorators['exclude'],
+        self.exclude: str = decorators['exclude']
         self.oai_url: str = decorators['oai_url']
         self.parsed_record: dict = self.parse()
         self.parsed_metadata: dict = self.parsed_record['metadata']
