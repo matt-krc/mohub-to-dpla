@@ -157,7 +157,16 @@ def parse_language(language_list):
             else:
                 language = language.lower()
             try:
-                lng = eval("languages.get({}='{}')".format(code, language))
+                if code == 'name':
+                    lng = languages.get(name=language)
+                elif code == 'part3':
+                    lng = languages.get(part3=language)
+                elif code == 'part2b':
+                    lng = languages.get(part2b=language)
+                elif code == 'part2t':
+                    lng = languages.get(part2t=language)
+                elif code == 'part1':
+                    lng = languages.get(part1=language)
                 outlist.append({f"iso639_3": lng.part3, "name": lng.name})
                 language_found = True
                 break
