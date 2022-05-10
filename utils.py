@@ -7,6 +7,7 @@ from glob import glob
 from datetime import datetime, timedelta
 import os
 import institutions
+from iso639 import languages
 
 DATA_DIR = './files/institutions'
 REPORTS_DIR = './files/reports'
