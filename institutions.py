@@ -20,14 +20,86 @@ with open(infile, "r") as inf:
 
 def get(id="all"):
     if id == "all":
-        return data
+        return [Institution(d) for d in data if d["id"] != "mhm"]
     else:
         for d in data:
             if d['id'] == id:
-                return d
+                return Institution(d)
             else:
                 return False
 
 
 def get_all_ids():
     return [d['id'] for d in data]
+
+
+class Institution:
+    def __init__(self, institution_data):
+        # url and id are required fields, the rest are optional when initializing
+        self.url: str = institution_data['url']
+        self.id: str = institution_data['id']
+
+        self.name: str = institution_data['institution'] if 'institution' in institution_data else ""
+        self.hub = institution_data['hub'] if 'hub' in institution_data else "mohub"
+        self.include: list = institution_data['include'] if 'include' in institution_data else []
+        self.exclude: list = institution_data['exclude'] if 'exclude' in institution_data else []
+        self.id_prefix: str = self.generate_id_prefix()
+
+    def generate_id_prefix(self):
+        prefix_components = []
+        institution_id = self.id
+
+        if self.hub == 'mohub':
+            prefix_components.append("missouri--urn")
+            prefix_components.append("data.mohistory.org")
+        elif self.hub == 'iowa':
+            prefix_components.append(f"iowa--urn")
+
+        if institution_id == 'frb':
+            id_snippet = 'frbstl_fraser'
+        elif institution_id == 'msu':
+            id_snippet = 'msu_all'
+        elif institution_id == 'kcpl1' or institution_id == 'kcpl2':
+            id_snippet = 'kcpl_pdr'
+        elif institution_id == 'umkc':
+            id_snippet = 'umkc_dl'
+        elif institution_id == 'stlpl':
+            id_snippet = 'slpl_dl'
+        elif institution_id == 'shsm':
+            id_snippet = '<collection>'
+        elif institution_id == 'mdh':
+            id_snippet = 'mdh_all'
+        elif institution_id == 'slu':
+            id_snippet = 'slu_dl'
+        elif institution_id == 'umsl':
+            id_snippet = 'umkc_dl'
+        elif institution_id == 'sgcl':
+            id_snippet = 'sgcl'
+        elif institution_id == 'wustl1' or institution_id == 'wustl2':
+            id_snippet = 'wustl_omeka'
+        else:
+            id_snippet = institution_id
+
+        prefix_components.append(id_snippet)
+
+        prefix_components.append("oai")
+
+        if institution_id == 'stlpl':
+            url_snippet = 'collections.slpl.org'
+        elif institution_id == 'slu':
+            url_snippet = 'cdm.slu.edu'
+        elif institution_id == 'wustl1':
+            url_snippet = 'omeka.wustl.edu'
+        elif institution_id == 'kcpl2':
+            url_snippet = 'pendergastkc.org'
+        elif institution_id == 'umkc' or institution_id == 'umsl':
+            url_snippet = "/".join([self.url.split("/")[2], self.url.split("/")[3]]) + "/"
+        else:
+            url_snippet = self.url.split("/")[2]
+        prefix_components.append(url_snippet)
+
+        if institution_id == 'frb':
+            prefix_components.append('title')
+
+        return ":".join(prefix_components)
+

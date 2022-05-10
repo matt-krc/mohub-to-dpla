@@ -1,12 +1,23 @@
 from dateutil import parser
 import pandas as pd
 import requests
-from iso639 import languages
 from urllib.parse import urlparse
 import json
 from glob import glob
 from datetime import datetime, timedelta
 import os
+import institutions
+
+DATA_DIR = './files/institutions'
+REPORTS_DIR = './files/reports'
+
+
+def get_data_files():
+    institutions_data = institutions.get()
+    files = []
+    for institution in institutions_data:
+        files.append(f"{DATA_DIR}/{institution.id}/{institution.id}.json")
+    return files
 
 
 def compile():
@@ -16,17 +27,17 @@ def compile():
     :return:
     """
     # TODO: Upload compiled file to Google Drive directly
-    json_files = glob("./files/institutions/**/*.json")
+    json_files = get_data_files()
     print("Compiling...")
+    datetimestr = datetime.now().strftime("%Y%m%d%H%M%S")
     out = []
     for file in json_files:
         print(file)
         with open(file, "r") as inf:
             data = json.load(inf)
-        out.extend(data)
+        out.extend(data['records'])
         inf.close()
-    datestr = datetime.now().strftime("%Y_%m_%d")
-    outfn = "./files/ingests/mohub_ingest_{}.json".format(datestr)
+    outfn = "./files/ingests/mohub_ingest_{}.json".format(datetimestr)
     with open(outfn, "w") as outf:
         json.dump(out, outf, indent=4)
     # finish by writing to jsonl, as DPLA prefers
@@ -34,11 +45,32 @@ def compile():
         for line in out:
             json.dump(line, outf)
             outf.write('\n')
+    write_report(datetimestr)
     print("Total: {}".format(len(out)))
     print("Wrote ingest file to {}".format(outfn))
 
 
-def write_file(out_path, out_data, id):
+def write_report(datetimestr):
+    json_files = get_data_files()
+    with open(f"{REPORTS_DIR}/report_{datetimestr}.txt", "w") as outf:
+        for file in json_files:
+            with open(file, 'r') as inf:
+                data = json.load(inf)
+            skipped = data['skipped']
+            count = data['count']
+            name = data['institution']
+            outf.write(f"# {name}\n")
+            outf.write(f"   - {count} records added\n")
+            outf.write(f"   - {skipped} records skipped\n\n")
+            inf.close()
+
+def write_file(out_path, metadata, id, name, skipped):
+    out_data = {
+        "institution": name,
+        "couht": len(metadata),
+        "skipped": skipped,
+        "records": metadata
+    }
     out_path = out_path if out_path[-1] == '/' else out_path + '/'
     with open("{}{}.json".format(out_path, id), "w") as outf:
         json.dump(out_data, outf, indent=4)
@@ -58,7 +90,7 @@ def generate_csvs(institution="*"):
         print(file)
         with open(file, "r") as inf:
             data = json.load(inf)
-        write_csv(data, file.replace(".json",".csv"))
+        write_csv(data['records'], file.replace(".json",".csv"))
 
 
 def get_metadata(field, metadata):

@@ -6,6 +6,7 @@ import argparse
 import utils
 import requests
 import institutions
+import sys
 
 if not os.path.isdir('files/ingests'):
     os.mkdir('files/ingests')
@@ -35,55 +36,35 @@ def main():
         utils.return_count()
         return True
 
-    data = institutions.get()
+    institutions_data = institutions.get()
 
-    report = {
-        "institutions": {}
-    }
     total = 0
 
-    for row in data:
-        url = row['url']
-        institution = row['institution']
-
+    for institution in institutions_data:
         if args.institutions:
-            if row['id'] not in args.institutions:
+            if institution.id not in args.institutions:
                 continue
 
-        if row['id'] == 'mhm':
-            url = row['url']
-            data = requests.get(url).json()
+        if institution.id == 'mhm':
+            # Missouri History Museum provides a data dump feed instead of an OAI feed
+            data = requests.get(institution.url).json()
             metadata = data['records']
 
         else:
             # Create OAI object based on input data
-            feed = OAI(row)
+            feed = OAI(institution)
 
-            # In order not to crawl redundantly, by default we skip crawls that have already taken place in the past 24 hours
-            if utils.crawled_recently(row['id']) and not args.ignore_time:
+            # In order not to crawl redundantly, by default we skip crawls from the past 24 hours
+            if utils.crawled_recently(institution.id) and not args.ignore_time:
                 print("{} has been crawled in less than 24 hours, continuing.".format(institution))
                 continue
 
-            print(institution)
-            print(url)
+            print(institution.name)
+            print(institution.url)
 
-            # Some institutions have opted to provide a data dump rather than an OAI feed.
             metadata, skipped = feed.crawl()
 
-            report['institutions'][row['id']] = {
-                "total": len(metadata),
-                "skipped": skipped
-            }
-        total += len(metadata)
-
-        utils.write_file("files/institutions/", metadata, row["id"])
-
-    report['total'] = total
-    report['crawled'] = '*' if not args.institutions else args.institutions
-    outp = "files/reports/report_{}.json".format(datetime.now().strftime("%Y%m%d%H%M%S"))
-    with open(outp, "w") as outf:
-        json.dump(report, outf, indent=4)
-    print("Report saved to {}".format(outp))
+        utils.write_file("files/institutions/", metadata, institution.id, institution.name, skipped)
 
     if args.csv:
         if args.institutions:
@@ -91,8 +72,10 @@ def main():
                 utils.generate_csvs(i)
         else:
             utils.generate_csvs()
-    utils.compile()
 
+    if not args.institutions:
+        # If crawling everything, generate compile output file and report
+        utils.compile()
 
 if __name__ == "__main__":
     main()

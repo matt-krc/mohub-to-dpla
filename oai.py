@@ -8,16 +8,21 @@ import sys
 
 
 class OAI:
-    def __init__(self, row, verbose=False):
-        self.verbose = verbose
-        self.url = row['url']
-        self.metadata_prefix = row['metadata_prefix'] if 'metadata_prefix' in row else self.get_metadata_prefix()
-        self.institution = row['institution']
-        self.institution_id = row['id']
-        self.include = row['include'] if 'include' in row else []
-        self.exclude = row['exclude'] if 'exclude' in row else []
-        self.hub = row['hub'] if 'hub' in row else ""
-        self.institution_id_prefix = self.generate_id_prefix()
+    def __init__(self, institution):
+        self.url = institution.url
+        self.id = institution.id
+        self.id_prefix = institution.id_prefix
+        self.name = institution.name or self.get_institution_name()
+        self.metadata_prefix = self.get_metadata_prefix()
+        self.include = institution.include
+        self.exclude = institution.exclude
+        self.hub = institution.hub
+
+    def print_info(self):
+        print(f"Institution name: {self.name}")
+        print(f"Institution ID: {self.id}")
+        print(f"OAI feed URL: {self.url}")
+        print(f"Metadata prefix: {self.metadata_prefix}")
 
     def oai_request(self, verb):
         """
@@ -61,65 +66,6 @@ class OAI:
 
         return metadata_prefix
 
-    def generate_id_prefix(self):
-        prefix_components = []
-        institution_id = self.institution_id
-
-        if self.hub == 'mohub':
-            prefix_components.append("missouri--urn")
-            prefix_components.append("data.mohistory.org")
-        elif self.hub == 'iowa':
-            prefix_components.append(f"iowa--urn")
-
-
-        if institution_id == 'frb':
-            id_snippet = 'frbstl_fraser'
-        elif institution_id == 'msu':
-            id_snippet = 'msu_all'
-        elif institution_id == 'kcpl1' or institution_id == 'kcpl2':
-            id_snippet = 'kcpl_pdr'
-        elif institution_id == 'umkc':
-            id_snippet = 'umkc_dl'
-        elif institution_id == 'stlpl':
-            id_snippet = 'slpl_dl'
-        elif institution_id == 'shsm':
-            id_snippet = '<collection>'
-        elif institution_id == 'mdh':
-            id_snippet = 'mdh_all'
-        elif institution_id == 'slu':
-            id_snippet = 'slu_dl'
-        elif institution_id == 'umsl':
-            id_snippet = 'umkc_dl'
-        elif institution_id == 'sgcl':
-            id_snippet = 'sgcl'
-        elif institution_id == 'wustl1' or institution_id == 'wustl2':
-            id_snippet = 'wustl_omeka'
-        else:
-            id_snippet = institution_id
-
-        prefix_components.append(id_snippet)
-
-        prefix_components.append("oai")
-
-        if institution_id == 'stlpl':
-            url_snippet = 'collections.slpl.org'
-        elif institution_id == 'slu':
-            url_snippet = 'cdm.slu.edu'
-        elif institution_id == 'wustl1':
-            url_snippet = 'omeka.wustl.edu'
-        elif institution_id == 'kcpl2':
-            url_snippet = 'pendergastkc.org'
-        elif institution_id == 'umkc' or institution_id == 'umsl':
-            url_snippet = "/".join([self.url.split("/")[2], self.url.split("/")[3]]) + "/"
-        else:
-            url_snippet = self.url.split("/")[2]
-        prefix_components.append(url_snippet)
-
-        if institution_id == 'frb':
-            prefix_components.append('title')
-
-        return ":".join(prefix_components)
-
     def identify(self):
         verb = "Identify"
         soup = self.oai_request(verb)
@@ -144,7 +90,7 @@ class OAI:
             raise
         return name
 
-    def list_sets(self, url):
+    def list_sets(self):
         """
         For a given OAI feed, request the ListSets endpoint and return a list of sets and set IDs
 
@@ -152,8 +98,8 @@ class OAI:
         :return: list of sets for a given OAI feed
         """
         verb = "ListSets"
-        soup = self.oai_request(url, verb)
-        sets = [{"setSpec": set["setSpec"], "setName": set["setName"]} for set in soup.find_all("set")]
+        soup = self.oai_request(verb)
+        sets = [{"setSpec": set.find("setspec").getText(), "setName": set.find("setname").getText()} for set in soup.find_all("set")]
 
         return sets
 
@@ -215,17 +161,17 @@ class OAI:
                     continue
                 if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
                     metadata_prefix = '{}:dc'.format(metadata_prefix)
-                decorators = {
+                oai_data = {
                     "metadata_prefix": metadata_prefix,
-                    "institution": self.institution,
-                    "institution_id": self.institution_id,
-                    "institution_id_prefix": self.institution_id_prefix,
+                    "institution": self.name,
+                    "institution_id": self.id,
+                    "institution_id_prefix": self.id_prefix,
                     "exclude": self.exclude,
                     "hub": self.hub,
                     "oai_url": self.url
                 }
                 try:
-                    out_record = Record(record, decorators)
+                    out_record = Record(record, oai_data)
                 except TypeError as e:
                     skipped += 1
                     continue
