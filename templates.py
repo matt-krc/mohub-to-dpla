@@ -1,4 +1,4 @@
-class Map:
+class Template:
     def __init__(self, record):
         self.record = record
         self.metadata = record.parsed_metadata
@@ -73,7 +73,50 @@ class Map:
         return metadata
 
 
+def dpla_template():
+    """
+    Default record template for DPLA records
 
+    :return:
+    """
+    row = {
+        "@context": "http://dp.la/api/items/context",
+        "isShownAt": None,  # URL to object
+        "dataProvider": "",
+        "@type": "ore:Aggregation",
+        "hasView": {
+            "@id": None  # URL to object
+        },
+        "provider": {
+            "@id": "http://dp.la/api/contributor/missouri-hub",
+            "name": "Missouri Hub"
+        },
+        "object": None,  # thumbnail
+        "aggregatedCHO": "#sourceResource",
+        "sourceResource": {
+            "title": [],
+            "description": [],
+            "subject": [],
+            "temporal": [],
+            "rights": "",
+            "@id": "",  # OAI ID
+            "language": [
+                {
+                    "iso639_3": "eng",
+                    "name": "English"
+                }
+            ],
+            "stateLocatedIn": [
+                {
+                    "name": "Missouri"
+                }
+            ],
+            "format": "",
+            "identifier": [],
+            "creator": [],
+            "specType": []
+        },
+        "@id": ""
+    }
 
-
-
+    return row

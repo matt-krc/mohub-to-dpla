@@ -28,7 +28,7 @@ class OAI:
         Instatiates an OAI feed request, given an OAI verb.
 
         :param verb:
-        :return:
+        :return: BeautifulSoup object
         """
         params = {
             "verb": verb
@@ -43,10 +43,10 @@ class OAI:
 
     def get_metadata_prefix(self):
         """
-        Returns an OAI feed's available metadata prefixes.
+        Requests an OAI feed's ListMetadataFormats endpoint to find available metadata formats
+        Right now, oai_dc is preferred and is returned if it's a viable option
 
-        :param url: string
-        :return: list of metadata prefixes available
+        :return: string
         """
         verb = "ListMetadataFormats"
         soup = self.oai_request(verb)
@@ -66,6 +66,11 @@ class OAI:
         return metadata_prefix
 
     def identify(self):
+        """
+        Return data included in the OAI feeds Identify endpoint
+
+        :return: dict
+        """
         verb = "Identify"
         soup = self.oai_request(verb)
 
@@ -77,10 +82,8 @@ class OAI:
         """
         For a given OAI feed, return the institution's name as stored in the OAI feed's 'Identify' endpoint.
 
-        :param url: root url for an OAI feed
-        :return: string name of the institution
+        :return: Institution name as string
         """
-
         verb = "Identify"
         soup = self.oai_request(verb)
         try:
@@ -91,10 +94,8 @@ class OAI:
 
     def list_sets(self):
         """
-        For a given OAI feed, request the ListSets endpoint and return a list of sets and set IDs
+        For a given OAI feed, return a list of sets and set IDs
 
-        :param url: root url for an OAI feed
-        :return: list of sets for a given OAI feed
         """
         verb = "ListSets"
         soup = self.oai_request(verb)
@@ -103,6 +104,11 @@ class OAI:
         return sets
 
     def crawl(self):
+        """
+        Crawl an OAI feed, parse and format metadata and output it in a DPLA-formatted JSON file
+
+        :return: metadata and count of skipped records
+        """
         print(f"{self.name} ({self.id})")
         print(self.id)
         out = []

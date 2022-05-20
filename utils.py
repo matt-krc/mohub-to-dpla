@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import os
 import institutions
 from iso639 import languages
+from urllib.parse import urlparse
 
 DATA_DIR = './files/institutions'
 REPORTS_DIR = './files/reports'
@@ -289,3 +290,47 @@ def return_count():
     print("Total: "+str(len(records)))
     for provider, value in data_providers.items():
         print(f"{provider}: {value}")
+
+
+def format_metadata(field, metadata, return_format="list"):
+    value = get_metadata(field, metadata)
+
+    # case 1: field doesn't exist, return either empty list or string
+    if not value:
+        if return_format == "string":
+            return ""
+        return []
+
+    # case 2: subjects are always lists of dicts formatted a particular way
+    if field == 'subject':
+        return [{"name": subj} for subj in value]
+
+    # case 3: language
+    if field == 'language':
+        return parse_language(value)
+
+    # handle title fields that get split
+    if field == "title" or field == "date":
+        value = [value[0]]
+
+    # handle all other fields based on current type and format required
+    if return_format == "string" and type(value) == list:
+        return "; ".join(value)
+    elif return_format == "list" and type(value) == str:
+        return [value.replace("\n", "")]
+    else:
+        return value
+
+
+def generate_cdm_thumbnail(url):
+    try:
+        collection = url.split("/")[url.split("/").index("collection") + 1]
+    except ValueError as e:
+        print(url)
+        raise
+    record_id = url.split("/")[-1]
+    o = urlparse(url)
+    base = "{}://{}".format(o.scheme, o.netloc)
+    thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
+
+    return thumbnail

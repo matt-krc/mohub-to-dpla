@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-from map import Map
+from templates import Template, dpla_template
 import utils
-from urllib.parse import urlparse
+from map_list import map_list
 
 
 class Record:
@@ -40,8 +40,8 @@ class Record:
         if type(self.record) == bool:
             return False
         institution_id = self.institution_id
-        dpla_row = self.record_template()
-        metadata_map = Map(self)
+        dpla_row = dpla_template()
+        metadata_map = Template(self)
         if institution_id == 'frb':
             metadata = metadata_map.frb()
         else:
@@ -70,15 +70,15 @@ class Record:
                     if len(k.split("_")) > 1 and k.split("_")[1][:4] == 'http':
                         self.parsed_metadata[k.split("_")[0]] = v
                         del self.parsed_metadata[k]
-            metadata = Map(self).default()
+            metadata = Template(self).default()
 
             if institution_id == 'kcpl1':
-                metadata["sourceResource"]["publisher"] = self.format_metadata("publisher", self.parsed_metadata)
+                metadata["sourceResource"]["publisher"] = utils.format_metadata("publisher", self.parsed_metadata)
             elif institution_id == 'lhl':
                 metadata["sourceResource"][
                     "rights"] = "NO COPYRIGHT - UNITED STATES\nThe organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States, but a determination was not made as to its copyright status under the copyright laws of other countries. The Item may not be in the Public Domain under the laws of other countries. Please refer to the organization that has made the Item available for more information."
-                metadata["sourceResource"]["format"] = self.format_metadata("type", self.parsed_metadata, "string")
-                metadata["sourceResource"]["creator"] = self.format_metadata("contributor", self.parsed_metadata)
+                metadata["sourceResource"]["format"] = utils.format_metadata("type", self.parsed_metadata, "string")
+                metadata["sourceResource"]["creator"] = utils.format_metadata("contributor", self.parsed_metadata)
                 metadata["@id"] = "missouri--urn:data.mohistory.org:" + self.parsed_header["identifier"][0]
 
         if not metadata:
@@ -104,54 +104,6 @@ class Record:
         dpla_row["sourceResource"] = metadata["sourceResource"]
 
         return dpla_row
-
-    def record_template(self):
-        """
-        Default record template for DPLA records
-
-        :return:
-        """
-        row = {
-            "@context": "http://dp.la/api/items/context",
-            "isShownAt": None,  # URL to object
-            "dataProvider": "",
-            "@type": "ore:Aggregation",
-            "hasView": {
-                "@id": None  # URL to object
-            },
-            "provider": {
-                "@id": "http://dp.la/api/contributor/missouri-hub",
-                "name": "Missouri Hub"
-            },
-            "object": None,  # thumbnail
-            "aggregatedCHO": "#sourceResource",
-            "sourceResource": {
-                "title": [],
-                "description": [],
-                "subject": [],
-                "temporal": [],
-                "rights": "",
-                "@id": "",  # OAI ID
-                "language": [
-                    {
-                        "iso639_3": "eng",
-                        "name": "English"
-                    }
-                ],
-                "stateLocatedIn": [
-                    {
-                        "name": "Missouri"
-                    }
-                ],
-                "format": "",
-                "identifier": [],
-                "creator": [],
-                "specType": []
-            },
-            "@id": ""
-        }
-
-        return row
 
     def is_deleted(self):
         header = self.header
@@ -197,10 +149,6 @@ class Record:
                 # Coverage gets "counted" as subject
                 el.name = "subject"
 
-            # TODO: Publisher is used as author in UMKC, figure out if it conflicts (it does -- MDH uses it for attribution)
-            # if el.name == 'publisher':
-            #    el.name = "creator"
-
             # Handle same field names
             if el.name in row:
                 if "titleinfo_" in el.name:
@@ -215,91 +163,17 @@ class Record:
 
         return row
 
-    def format_metadata(self, field, metadata, return_format="list"):
-        value = utils.get_metadata(field, metadata)
-
-        # case 1: field doesn't exist, return either empty list or string
-        if not value:
-            if return_format == "string":
-                return ""
-            return []
-
-        # case 2: subjects are always lists of dicts formatted a particular way
-        if field == 'subject':
-            return [{"name": subj} for subj in value]
-
-        # case 3: language
-        if field == 'language':
-            return utils.parse_language(value)
-
-        # handle title fields that get split
-        if field == "title" or field == "date":
-            value = [value[0]]
-
-        # handle all other fields based on current type and format required
-        if return_format == "string" and type(value) == list:
-            return "; ".join(value)
-        elif return_format == "list" and type(value) == str:
-            return [value.replace("\n", "")]
-        else:
-            return value
-
     def get_urls(self, type="main"):
         institution_id = self.institution_id
         metadata = self.parsed_metadata
         header = self.parsed_header
+        metadata['institution_id'] = institution_id
+        metadata['header'] = header
 
-        if institution_id == 'frb':
-            url = self.format_metadata("location.url", metadata, "string")
-            thumbnail = self.format_metadata("location.url_preview", metadata, "string")
-        elif 'cdm' in header['identifier'][0] or institution_id == 'msu':
-            url = metadata["identifier"][-1]
-            thumbnail = self.generate_cdm_thumbnail(metadata["identifier"][-1])
-        elif institution_id == 'wustl1':
-            url = metadata["identifier"][0] if "identifier" in metadata else ""
-            thumbnail = metadata["identifier"][1] if "identifier" in metadata else ""
-        elif institution_id == 'wustl2':
-            url = [i for i in metadata["identifier"] if "omeka.wustl.edu/omeka/items" in i][0]
-            thumbnail = [t for t in metadata["identifier"] if "omeka.wustl.edu/omeka/files/" in t][0] if len([t for t in metadata["identifier"] if "omeka.wustl.edu/omeka/files/" in t]) > 0 else ""
-        elif institution_id == "umkc" or institution_id == "umsl":
-            url = f"https://dl.mospace.umsystem.edu/{institution_id}/islandora/object/{metadata['identifier'][0]}"
-            thumbnail = metadata["identifier.thumbnail"][0] if "identifier.thumbnail" in metadata else ""
-        elif institution_id == 'kcpl1':
-            url = metadata["relation"][0]
-            thumbnail = ""
-        elif institution_id == 'kcpl2':
-            url = "https://kchistory.org/islandora/object/{}".format(metadata["identifier"][0])
-            thumbnail = ""
-        elif institution_id == 'lhl':
-            url = "https://catalog.lindahall.org/permalink/01LINDAHALL_INST/19lda7s/alma" + \
-                 header["identifier"][0].split(":")[-1]
-            thumbnail = "https://catalog.lindahall.org/view/delivery/thumbnail/01LINDAHALL_INST/" + \
-                        header["identifier"][0].split(":")[-1]
-        elif institution_id == 'uni':
-            url = metadata["identifier"][0]
-            thumbnail = ""
-            if 'description' in metadata:
-                for d in metadata['description']:
-                    if d.split('.')[-1] in ['jpg', 'jpeg'] and d[:4] == 'http':
-                        thumbnail = d
-                        break
-        elif institution_id == 'grinnell':
-            if 'identifier' in metadata:
-                identifier = metadata['identifier'][0]
-                base_url = "https://digital.grinnell.edu"
-                collection = identifier.split(':')[0]
-                if collection != 'grinnell':
-                    url = ""
-                    thumbnail = ""
-                else:
-                    url = f"{base_url}/islandora/object/{identifier}"
-                    thumbnail = f"{base_url}/islandora/object/{identifier}/datastream/TN/view"
-            else:
-                url = ""
-                thumbnail = ""
-        else:
-            url = False
-            thumbnail = ""
+        try:
+            url, thumbnail = map_list[institution_id](metadata)
+        except KeyError:
+            url, thumbnail = False, ""
 
         return thumbnail if type == "thumbnail" else url
 
@@ -332,15 +206,3 @@ class Record:
                     urls[field] = url
         return urls
 
-    def generate_cdm_thumbnail(self, url):
-        try:
-            collection = url.split("/")[url.split("/").index("collection") + 1]
-        except ValueError as e:
-            print(url)
-            raise
-        record_id = url.split("/")[-1]
-        o = urlparse(url)
-        base = "{}://{}".format(o.scheme, o.netloc)
-        thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
-
-        return thumbnail
