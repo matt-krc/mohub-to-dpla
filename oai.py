@@ -16,6 +16,7 @@ class OAI:
         self.include = institution.include
         self.exclude = institution.exclude
         self.hub = institution.hub
+        self.skipped_records = {}
 
     def print_info(self):
         print(f"Institution name: {self.name}")
@@ -103,6 +104,12 @@ class OAI:
 
         return sets
 
+    def add_skipped_record(self, reason):
+        if reason in self.skipped_records:
+            self.skipped_records[reason] += 1
+        else:
+            self.skipped_records[reason] = 1
+
     def crawl(self):
         """
         Crawl an OAI feed, parse and format metadata and output it in a DPLA-formatted JSON file
@@ -165,6 +172,12 @@ class OAI:
             for record in records:
                 if not record.find('metadata') or not record.find('header'):
                     skipped += 1
+                    if not record.find('metadata') and not record.find('header'):
+                        self.add_skipped_record("OAI header and metadata field both missing")
+                    elif not record.find('metadata'):
+                        self.add_skipped_record("OAI metadata field missing")
+                    elif not record.find('header'):
+                        self.add_skipped_record("OAI header field missing")
                     continue
                 if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
                     metadata_prefix = '{}:dc'.format(metadata_prefix)
@@ -181,9 +194,7 @@ class OAI:
                     out_record = Record(record, oai_data)
                 except TypeError as e:
                     skipped += 1
-                    continue
-                if out_record.is_deleted():
-                    skipped += 1
+                    self.add_skipped_record("Error generating metadata record from OAI data")
                     continue
                 if out_record.url is False or not out_record.url:
                     if out_record.url is False:
@@ -198,11 +209,13 @@ class OAI:
                                 if k not in potential_urls:
                                     potential_urls[k] = v
                     skipped += 1
+                    self.add_skipped_record("URL field not present in metadata record")
                     continue
                 out_record = out_record.map()
                 if out_record:
                     out.append(out_record)
                 else:
+                    self.add_skipped_record("error occurred during mapping process")
                     skipped += 1
         if potential_urls:
             print("\n\nFound the following potential URL fields:")
@@ -210,5 +223,5 @@ class OAI:
                 print(f"{field}: {url}")
             sys.exit()
         print(f"\n{skipped} items were skipped.")
-        utils.write_file("files/institutions/", out, self.id, self.name, skipped)
+        utils.write_file("files/institutions/", out, self.id, self.name, skipped, self.skipped_records)
         return out, skipped

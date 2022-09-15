@@ -18,12 +18,12 @@ with open(infile, "r") as inf:
     data = json.load(inf)
 
 
-def get(id="all"):
-    if id == "all":
-        return [Institution(d) for d in data if d["id"] != "mhm"]
+def get(institution_id="all"):
+    if institution_id == "all":
+        return [Institution(d) for d in data]
     else:
         for d in data:
-            if d['id'] == id:
+            if d['id'] == institution_id:
                 return Institution(d)
             else:
                 return False

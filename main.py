@@ -39,6 +39,7 @@ def main():
             # Missouri History Museum provides a data dump feed instead of an OAI feed
             data = requests.get(institution.url).json()
             metadata = data['records']
+            utils.write_file("files/institutions/", metadata, institution.id, institution.name, 0)
 
         else:
             # Create OAI object based on input data
@@ -46,7 +47,7 @@ def main():
 
             # In order not to crawl redundantly, by default we skip crawls from the past 24 hours
             if utils.crawled_recently(institution.id) and not args.ignore_time:
-                print("{} has been crawled in less than 24 hours, continuing.".format(institution))
+                print("{} has been crawled in less than 24 hours, continuing.".format(institution.id))
                 continue
 
             # Crawl the feed and write output to JSON

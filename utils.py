@@ -8,6 +8,7 @@ import os
 import institutions
 from iso639 import languages
 from urllib.parse import urlparse
+import sys
 
 DATA_DIR = './files/institutions'
 REPORTS_DIR = './files/reports'
@@ -27,7 +28,7 @@ def compile():
 
     :return:
     """
-    # TODO: Upload compiled file to Google Drive directly
+    # TODO: Upload compiled file to S3 directly
     json_files = get_data_files()
     print("Compiling...")
     datetimestr = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -65,11 +66,12 @@ def write_report(datetimestr):
             outf.write(f"   - {skipped} records skipped\n\n")
             inf.close()
 
-def write_file(out_path, metadata, id, name, skipped):
+def write_file(out_path, metadata, id, name, skipped, skipped_records):
     out_data = {
         "institution": name,
         "count": len(metadata),
         "skipped": skipped,
+        "skipped_errors": skipped_records,
         "records": metadata
     }
     out_path = out_path if out_path[-1] == '/' else out_path + '/'
@@ -263,11 +265,11 @@ def get_datadump(url):
     return res.json()['records']
 
 def crawled_recently(id):
-    if not os.path.exists("files/institutions/{}/{}.json".format(id, id)):
+    if not os.path.exists("files/institutions/{}.json".format(id, id)):
         return False
     now = datetime.now()
     if now - timedelta(hours=24) <= datetime.fromtimestamp(
-                os.path.getmtime("./files/institutions/{}/{}.json".format(id, id))) <= now:
+                os.path.getmtime("./files/institutions/{}.json".format(id, id))) <= now:
         return True
     return False
 

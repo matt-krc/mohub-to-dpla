@@ -17,5 +17,6 @@ map_list = {
     "lhl": lhl,
     "drake": cdm,
     "grinnell": grinnell,
-    "uni": uni
+    "uni": uni,
+    "isu": isu
 }

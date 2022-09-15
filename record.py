@@ -201,8 +201,10 @@ class Record:
         urls = {}
         metadata = self.parsed_record['metadata']
         for k, v in metadata.items():
-            for field, url in self.check_if_url(k, v).items():
-                if field not in urls:
-                    urls[field] = url
+            potential_urls = self.check_if_url(k, v)
+            if potential_urls:
+                for field, url in potential_urls.items():
+                    if field not in urls:
+                        urls[field] = url
         return urls
 

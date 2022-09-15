@@ -49,6 +49,10 @@ Right now the process is oriented towards MoHub and its member institutions but 
 
 `python main.py` sets the whole aggregation process in motion for MoHub, first importing the institution data, then crawling OAI feed objects and outputting JSON data for ingest to DPLA
 
+# Experimental Feature(s)
+
+- If you add a new institution that doesn't have a corresponding metadata mapping set, the pipeline will crawl the entire OAI feed, searching for any metadata fields that look like URLs. This is intended to help establish a mapping for schemas where a mapping is not currently known.
+
 # Other scripts and functions
 
 - `init.py` creates necessary files and directories for the pipeline to function properly

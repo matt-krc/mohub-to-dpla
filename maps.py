@@ -78,3 +78,10 @@ def uni(metadata):
                 thumbnail = d
                 break
     return url, thumbnail
+
+
+def isu(metadata):
+    url = f"https://digitalcollections.lib.iastate.edu/islandora/object/{metadata['identifier'][0]}"
+    thumbnail = metadata["identifier.thumbnail"]
+
+    return url, thumbnail
