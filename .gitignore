@@ -1,3 +1,4 @@
+.env
 env.py
 .idea
 files/*.json

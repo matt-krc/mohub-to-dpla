@@ -16,12 +16,13 @@ def main():
                         action="store_true", help="If set, converts JSON output to CSV.")
     parser.add_argument('--compile_only', '-co', default=False,
                         help="If set, script doesn't run a crawl, only compiles all data files into one.", action="store_true")
+    parser.add_argument('--upload', '-u', default=False, help="If set, uploads compiled file to S3.", action="store_true")
     parser.add_argument('--count', default=False, help="Returns total amount of records from most recent ingest.", action="store_true")
     args = parser.parse_args()
 
     # If we only want to compile existing data files into combined file, set this argument.
     if args.compile_only:
-        utils.compile()
+        utils.compile(args.upload)
         return True
 
     if args.count:
@@ -41,6 +42,10 @@ def main():
             metadata = data['records']
             utils.write_file("files/institutions/", metadata, institution.id, institution.name, 0)
 
+        if institution.id == 'isu':
+            # TODO: Onboard ISU
+            continue
+
         else:
             # Create OAI object based on input data
             feed = OAI(institution)
@@ -58,7 +63,7 @@ def main():
 
     if not args.institutions:
         # If crawling everything, generate compile output file and report
-        utils.compile()
+        utils.compile(args.upload)
 
 
 if __name__ == "__main__":

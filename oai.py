@@ -16,7 +16,7 @@ class OAI:
         self.include = institution.include
         self.exclude = institution.exclude
         self.hub = institution.hub
-        self.skipped_records = {}
+        self.skipped_record_messages = {}
 
     def print_info(self):
         print(f"Institution name: {self.name}")
@@ -105,10 +105,10 @@ class OAI:
         return sets
 
     def add_skipped_record(self, reason):
-        if reason in self.skipped_records:
-            self.skipped_records[reason] += 1
+        if reason in self.skipped_record_messages:
+            self.skipped_record_messages[reason] += 1
         else:
-            self.skipped_records[reason] = 1
+            self.skipped_record_messages[reason] = 1
 
     def crawl(self):
         """
@@ -175,7 +175,13 @@ class OAI:
                     if not record.find('metadata') and not record.find('header'):
                         self.add_skipped_record("OAI header and metadata field both missing")
                     elif not record.find('metadata'):
-                        self.add_skipped_record("OAI metadata field missing")
+                        if 'status' in record.find('header'):
+                            if record.find('header')['status'] == 'deleted':
+                                self.add_skipped_record("Deleted record")
+                            else:
+                                self.add_skipped_record("OAI metadata field missing")
+                        else:
+                            self.add_skipped_record("OAI metadata field missing")
                     elif not record.find('header'):
                         self.add_skipped_record("OAI header field missing")
                     continue
@@ -223,5 +229,5 @@ class OAI:
                 print(f"{field}: {url}")
             sys.exit()
         print(f"\n{skipped} items were skipped.")
-        utils.write_file("files/institutions/", out, self.id, self.name, skipped, self.skipped_records)
+        utils.write_file("files/institutions/", out, self.id, self.name, skipped, self.skipped_record_messages)
         return out, skipped

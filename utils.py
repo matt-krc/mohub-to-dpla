@@ -8,6 +8,11 @@ import os
 import institutions
 from iso639 import languages
 from urllib.parse import urlparse
+import progressbar
+import boto3
+from dotenv import load_dotenv
+
+load_dotenv()
 import sys
 
 DATA_DIR = './files/institutions'
@@ -21,8 +26,25 @@ def get_data_files():
         files.extend(glob(f"{DATA_DIR}/{institution.id}.json"))
     return files
 
+def upload(fpath):
+    fn = fpath.split("/")[-1]
+    client = boto3.client('s3',
+        aws_access_key_id=os.getenv('AWS_ACCESS_KEY'),
+        aws_secret_access_key=os.getenv('AWS_SECRET_KEY')
+    )
+    statinfo = os.stat(fpath)
+    up_progress = progressbar.progressbar.ProgressBar(maxval=statinfo.st_size)
+    up_progress.start()
+    def upload_progress(chunk):
+        up_progress.update(up_progress.currval + chunk)
+    now = datetime.now().strftime("%Y%m%d")
+    print("starting upload...")
+    res = client.upload_file(fpath, os.getenv('S3_BUCKET'), f"{now}/{fn}", Callback=upload_progress)
+    up_progress.finish()
+    print(f"finished upload to {now}/{fn}")
 
-def compile():
+
+def compile(upload):
     """
     Compiles all crawled files into one JSONL file to send off to DPLA
 
@@ -50,6 +72,8 @@ def compile():
     write_report(datetimestr)
     print("Total: {}".format(len(out)))
     print("Wrote ingest file to {}".format(outfn))
+    if upload:
+        upload(outfn)
 
 
 def write_report(datetimestr):
@@ -64,6 +88,8 @@ def write_report(datetimestr):
             outf.write(f"# {name}\n")
             outf.write(f"   - {count} records added\n")
             outf.write(f"   - {skipped} records skipped\n\n")
+            for reason, skip_count in data['skipped_errors'].items():
+                outf.write(f"       - {reason}: {skip_count}\n\n")
             inf.close()
 
 def write_file(out_path, metadata, id, name, skipped, skipped_records):
