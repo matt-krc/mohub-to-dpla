@@ -42,13 +42,7 @@ class OAI:
 
         return soup
 
-    def get_metadata_prefix(self):
-        """
-        Requests an OAI feed's ListMetadataFormats endpoint to find available metadata formats
-        Right now, oai_dc is preferred and is returned if it's a viable option
-
-        :return: string
-        """
+    def get_metadata_prefixes(self):
         verb = "ListMetadataFormats"
         soup = self.oai_request(verb)
         if not soup:
@@ -56,9 +50,21 @@ class OAI:
 
         metadata_prefixes = [m.getText() for m in soup.find_all('metadataprefix')]
 
-        # Right now we're preferring oai_dc metadata
+        return metadata_prefixes
+
+    def get_metadata_prefix(self):
+        """
+        Requests an OAI feed's ListMetadataFormats endpoint to find available metadata formats
+        Right now, oai_dc is preferred and is returned if it's a viable option
+
+        :return: string
+        """
+        metadata_prefixes = self.get_metadata_prefixes()
+
+        # Right now we prefer oai_dc metadata
         if 'oai_dc' in metadata_prefixes:
             metadata_prefix = 'oai_dc'
+
         # Otherwise we just pick one and hope that it works
         # TODO: Test a bunch of different prefixes to make sure they're interoperable
         else:
@@ -141,8 +147,8 @@ class OAI:
             sys.stdout.flush()
             # Some feeds are touchy about requesting too fast, so we pause for 5 seconds if a request error is encountered.
             try:
-                res = requests.get(url, params=params)
-            except requests.exceptions.ConnectionError as e:
+                res = requests.get(url, params=params, timeout=30)
+            except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
                 timeouts += 1
                 print("\nRequest timed out. Waiting 5 seconds and trying again. Attempt {}".format(timeouts))
                 if timeouts == 5:

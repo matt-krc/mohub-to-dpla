@@ -26,7 +26,7 @@ def get_data_files():
         files.extend(glob(f"{DATA_DIR}/{institution.id}.json"))
     return files
 
-def upload(fpath):
+def upload_s3(fpath):
     fn = fpath.split("/")[-1]
     client = boto3.client('s3',
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY'),
@@ -62,10 +62,11 @@ def compile(upload):
         out.extend(data['records'])
         inf.close()
     outfn = "./files/ingests/mohub_ingest_{}.json".format(datetimestr)
+    outfn_l = f"{outfn}l"
     with open(outfn, "w") as outf:
         json.dump(out, outf, indent=4)
     # finish by writing to jsonl, as DPLA prefers
-    with open(outfn + "l", "w") as outf:
+    with open(outfn_l, "w") as outf:
         for line in out:
             json.dump(line, outf)
             outf.write('\n')
@@ -73,7 +74,7 @@ def compile(upload):
     print("Total: {}".format(len(out)))
     print("Wrote ingest file to {}".format(outfn))
     if upload:
-        upload(outfn)
+        upload_s3(outfn_l)
 
 
 def write_report(datetimestr):
@@ -87,9 +88,10 @@ def write_report(datetimestr):
             name = data['institution']
             outf.write(f"# {name}\n")
             outf.write(f"   - {count} records added\n")
-            outf.write(f"   - {skipped} records skipped\n\n")
+            outf.write(f"   - {skipped} records skipped\n")
             for reason, skip_count in data['skipped_errors'].items():
-                outf.write(f"       - {reason}: {skip_count}\n\n")
+                outf.write(f"       - {reason}: {skip_count}\n")
+            outf.write("\n")
             inf.close()
 
 def write_file(out_path, metadata, id, name, skipped, skipped_records):
@@ -290,11 +292,11 @@ def get_datadump(url):
     res = requests.get(url)
     return res.json()['records']
 
-def crawled_recently(id):
+def crawled_recently(id, hours=24):
     if not os.path.exists("files/institutions/{}.json".format(id, id)):
         return False
     now = datetime.now()
-    if now - timedelta(hours=24) <= datetime.fromtimestamp(
+    if now - timedelta(hours=hours) <= datetime.fromtimestamp(
                 os.path.getmtime("./files/institutions/{}.json".format(id, id))) <= now:
         return True
     return False
