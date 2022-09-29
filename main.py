@@ -39,7 +39,7 @@ def main():
                 continue
 
         # In order not to crawl redundantly, by default we skip crawls from the past 24 hours
-        if utils.crawled_recently(institution.id, 48) and not args.ignore_time:
+        if utils.crawled_recently(institution.id, args.crawl_time or 24) and not args.ignore_time:
             print("{} has been crawled in less than {} hours, continuing.".format(institution.id, args.crawl_time))
             continue
 
