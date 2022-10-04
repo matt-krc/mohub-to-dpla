@@ -88,10 +88,9 @@ def write_report(datetimestr):
             name = data['institution']
             outf.write(f"# {name}\n")
             outf.write(f"   - {count} records added\n")
-            outf.write(f"   - {skipped} records skipped\n")
-            for reason, skip_count in data['skipped_errors'].items():
-                outf.write(f"       - {reason}: {skip_count}\n")
-            outf.write("\n")
+            outf.write(f"   - {skipped} records skipped\n\n")
+            for reason, records in data['skipped_errors'].items():
+                outf.write(f"       - {reason}: {count(records)}\n\n")
             inf.close()
 
 def write_file(out_path, metadata, id, name, skipped, skipped_records):

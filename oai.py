@@ -110,11 +110,11 @@ class OAI:
 
         return sets
 
-    def add_skipped_record(self, reason):
+    def add_skipped_record(self, reason, record):
         if reason in self.skipped_record_messages:
-            self.skipped_record_messages[reason] += 1
+            self.skipped_record_messages[reason].append(record)
         else:
-            self.skipped_record_messages[reason] = 1
+            self.skipped_record_messages[reason] = [record]
 
     def crawl(self):
         """
@@ -179,17 +179,17 @@ class OAI:
                 if not record.find('metadata') or not record.find('header'):
                     skipped += 1
                     if not record.find('metadata') and not record.find('header'):
-                        self.add_skipped_record("OAI header and metadata field both missing")
+                        self.add_skipped_record("OAI header and metadata field both missing", str(record))
                     elif not record.find('metadata'):
                         if 'status' in record.find('header'):
                             if record.find('header')['status'] == 'deleted':
-                                self.add_skipped_record("Deleted record")
+                                self.add_skipped_record("Deleted record", str(record))
                             else:
-                                self.add_skipped_record("OAI metadata field missing")
+                                self.add_skipped_record("OAI metadata field missing", str(record))
                         else:
-                            self.add_skipped_record("OAI metadata field missing")
+                            self.add_skipped_record("OAI metadata field missing", str(record))
                     elif not record.find('header'):
-                        self.add_skipped_record("OAI header field missing")
+                        self.add_skipped_record("OAI header field missing", str(record))
                     continue
                 if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
                     metadata_prefix = '{}:dc'.format(metadata_prefix)
@@ -206,28 +206,28 @@ class OAI:
                     out_record = Record(record, oai_data)
                 except TypeError as e:
                     skipped += 1
-                    self.add_skipped_record("Error generating metadata record from OAI data")
+                    self.add_skipped_record("Error generating metadata record from OAI data", str(record))
                     continue
                 if out_record.url is False or not out_record.url:
-                    if out_record.url is False:
-                        if not potential_urls:
-                            if not no_map:
-                                print("\n\nNo URL mapping could be established for institution.")
-                                print("Attempting to find metadata fields containing URLs.")
-                                potential_urls = out_record.search_for_urls()
-                                no_map = True
-                        else:
-                            for k, v in out_record.search_for_urls().items():
-                                if k not in potential_urls:
-                                    potential_urls[k] = v
+                    # if out_record.url is False:
+                    #     if not potential_urls:
+                    #         if not no_map:
+                    #             print("\n\nNo URL mapping could be established for institution.")
+                    #             print("Attempting to find metadata fields containing URLs.")
+                    #             potential_urls = out_record.search_for_urls()
+                    #             no_map = True
+                    #     else:
+                    #         for k, v in out_record.search_for_urls().items():
+                    #             if k not in potential_urls:
+                    #                 potential_urls[k] = v
                     skipped += 1
-                    self.add_skipped_record("URL field not present in metadata record")
+                    self.add_skipped_record("URL field not present in metadata record", str(record))
                     continue
                 out_record = out_record.map()
                 if out_record:
                     out.append(out_record)
                 else:
-                    self.add_skipped_record("error occurred during mapping process")
+                    self.add_skipped_record("error occurred during mapping process", str(record))
                     skipped += 1
         if potential_urls:
             print("\n\nFound the following potential URL fields:")

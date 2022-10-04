@@ -81,7 +81,15 @@ def uni(metadata):
 
 
 def isu(metadata):
-    url = f"https://digitalcollections.lib.iastate.edu/islandora/object/{metadata['identifier'][0]}"
+    verbose_url = ""
+    short_url = ""
+    for identifier in metadata['identifier']:
+        if identifier.split(':')[0] == 'isu':
+            verbose_url = f"https://digitalcollections.lib.iastate.edu/islandora/object/{identifier}"
+        elif 'https://n2t.net' in identifier:
+            short_url = identifier
+    url = verbose_url if verbose_url else short_url
+
     thumbnail = metadata["identifier.thumbnail"]
 
     return url, thumbnail

@@ -17,6 +17,30 @@ infile = "./files/mohub_oai.json"
 with open(infile, "r") as inf:
     data = json.load(inf)
 
+# these are used to construct legacy identifiers
+# ids not included just use current id
+id_snippets = {
+    'frb': 'frbstl_fraser',
+    'msu': 'msu_all',
+    'kcpl1': 'kcpl_pdr',
+    'kcpl2': 'kcpl_pdr',
+    'umkc': 'umkc_dl',
+    'stlpl': 'slpl_dl',
+    'shsm': '<collection>',
+    'mdh': 'mdh_all',
+    'slu': 'slu_dl',
+    'umsl': 'umkc_dl',
+    'wustl1': 'wustl_omeka',
+    'wustl2': 'wustl_omeka'
+}
+
+url_snippets = {
+    'stlpl': 'collections.slpl.org',
+    'slu': 'cdm.slu.edu',
+    'wustl1': 'omeka.wustl.edu',
+    'kcpl2': 'pendergastkc.org'
+}
+
 
 def get(institution_id="all"):
     if institution_id == "all":
@@ -25,8 +49,7 @@ def get(institution_id="all"):
         for d in data:
             if d['id'] == institution_id:
                 return Institution(d)
-            else:
-                return False
+        return False
 
 
 def get_all_ids():
@@ -35,15 +58,18 @@ def get_all_ids():
 
 class Institution:
     def __init__(self, institution_data):
+        # from oai import OAI
         # url and id are required fields, the rest are optional when initializing
         self.url: str = institution_data['url']
         self.id: str = institution_data['id']
-
         self.name: str = institution_data['institution'] if 'institution' in institution_data else ""
         self.hub = institution_data['hub'] if 'hub' in institution_data else "mohub"
         self.include: list = institution_data['include'] if 'include' in institution_data else []
         self.exclude: list = institution_data['exclude'] if 'exclude' in institution_data else []
         self.id_prefix: str = self.generate_id_prefix()
+        self.preferred_metadata_prefix: str = institution_data['metadata_prefix'] if 'metadata_prefix' in institution_data else None
+        # self.oai = OAI(self)
+        # self.metadata_prefixes = self.oai.get_metadata_prefixes()
 
     def generate_id_prefix(self):
         prefix_components = []
@@ -53,32 +79,9 @@ class Institution:
             prefix_components.append("missouri--urn")
             prefix_components.append("data.mohistory.org")
         elif self.hub == 'iowa':
-            prefix_components.append(f"iowa--urn")
+            prefix_components.append("iowa--urn")
 
-        if institution_id == 'frb':
-            id_snippet = 'frbstl_fraser'
-        elif institution_id == 'msu':
-            id_snippet = 'msu_all'
-        elif institution_id == 'kcpl1' or institution_id == 'kcpl2':
-            id_snippet = 'kcpl_pdr'
-        elif institution_id == 'umkc':
-            id_snippet = 'umkc_dl'
-        elif institution_id == 'stlpl':
-            id_snippet = 'slpl_dl'
-        elif institution_id == 'shsm':
-            id_snippet = '<collection>'
-        elif institution_id == 'mdh':
-            id_snippet = 'mdh_all'
-        elif institution_id == 'slu':
-            id_snippet = 'slu_dl'
-        elif institution_id == 'umsl':
-            id_snippet = 'umkc_dl'
-        elif institution_id == 'sgcl':
-            id_snippet = 'sgcl'
-        elif institution_id == 'wustl1' or institution_id == 'wustl2':
-            id_snippet = 'wustl_omeka'
-        else:
-            id_snippet = institution_id
+        id_snippet = id_snippets[institution_id] if institution_id in id_snippets else institution_id
 
         prefix_components.append(id_snippet)
 

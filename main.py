@@ -49,10 +49,6 @@ def main():
             metadata = data['records']
             utils.write_file("files/institutions/", metadata, institution.id, institution.name, 0, {})
 
-        if institution.id == 'isu':
-            # TODO: Onboard ISU
-            continue
-
         else:
             # Create OAI object based on input data
             feed = OAI(institution)
