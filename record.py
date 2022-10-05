@@ -2,43 +2,55 @@ from bs4 import BeautifulSoup
 from templates import Template, dpla_template
 import utils
 from map_list import map_list
+import sys
 
 
 class Record:
     def __init__(self, record, decorators):
-        self.record: BeautifulSoup.element.Tag = record
-        self.header: BeautifulSoup.element.Tag = self.record.find('header')
-        self.metadata_prefix: str = decorators['metadata_prefix']
-        self.metadata: BeautifulSoup.element.Tag = self.record.find('metadata').find(self.metadata_prefix)
         self.institution: str = decorators['institution']
         self.institution_id: str = decorators['institution_id']
         self.institution_prefix: str = decorators['institution_id_prefix']
         self.exclude: str = decorators['exclude']
         self.oai_url: str = decorators['oai_url']
-        self.parsed_record: dict = self.parse()
-        self.parsed_metadata: dict = self.parsed_record['metadata']
-        self.parsed_header: dict = self.parsed_record['header']
+        self.metadata_prefix: str = decorators['metadata_prefix']
+
+        self.record: BeautifulSoup.element.Tag = record
+        self.parsed_record = {}
+        self.header: BeautifulSoup.element.Tag = self.set_header()
+        self.parsed_header: dict = self.set_parsed_header()
+        self.metadata: BeautifulSoup.element.Tag = self.set_metadata()
+        self.parsed_metadata: dict = self.set_parsed_metadata()
+
         self.url: str = self.get_urls()
         self.thumbnail: str = self.get_urls("thumbnail")
 
     def __bool__(self):
         return type(self.parsed_record) == dict
 
-    def parse(self):
-        record = self.record
-        record['header'] = self.clean_fields(self.header)
+    def set_header(self):
+        if not self.record.find('header'):
+            raise OAIRecordException('No header in row')
+        return self.record.find('header')
 
-        if 'setspec' in record['header']:
-            if record['header']['setspec'][0] in self.exclude:
-                return False
+    def set_metadata(self):
+        if not self.record.find('metadata'):
+            if self.is_deleted():
+                raise OAIRecordException('Record is deleted')
+            raise OAIRecordException('No metadata in row', self.parsed_header)
+        return self.record.find('metadata').find(self.metadata_prefix)
 
-        record['metadata'] = self.clean_fields(self.metadata)
+    def set_parsed_header(self):
+        self.parsed_record['header'] = self.clean_fields(self.header)
+        if 'setspec' in self.parsed_record['header']:
+            if self.parsed_record['header']['setspec'][0] in self.exclude:
+                raise OAIRecordException('Collection excluded from crawl', self.parsed_record['header'])
+        return self.parsed_record['header']
 
-        return record
+    def set_parsed_metadata(self):
+        self.parsed_record['metadata'] = self.clean_fields(self.metadata)
+        return self.parsed_record['metadata']
 
     def map(self):
-        if type(self.record) == bool:
-            return False
         institution_id = self.institution_id
         dpla_row = dpla_template()
         metadata_map = Template(self)
@@ -75,8 +87,7 @@ class Record:
             if institution_id == 'kcpl1':
                 metadata["sourceResource"]["publisher"] = utils.format_metadata("publisher", self.parsed_metadata)
             elif institution_id == 'lhl':
-                metadata["sourceResource"][
-                    "rights"] = "NO COPYRIGHT - UNITED STATES\nThe organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States, but a determination was not made as to its copyright status under the copyright laws of other countries. The Item may not be in the Public Domain under the laws of other countries. Please refer to the organization that has made the Item available for more information."
+                metadata["sourceResource"]["rights"] = "NO COPYRIGHT - UNITED STATES\nThe organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States, but a determination was not made as to its copyright status under the copyright laws of other countries. The Item may not be in the Public Domain under the laws of other countries. Please refer to the organization that has made the Item available for more information."
                 metadata["sourceResource"]["format"] = utils.format_metadata("type", self.parsed_metadata, "string")
                 metadata["sourceResource"]["creator"] = utils.format_metadata("contributor", self.parsed_metadata)
                 metadata["@id"] = "missouri--urn:data.mohistory.org:" + self.parsed_header["identifier"][0]
@@ -175,6 +186,13 @@ class Record:
         except KeyError:
             url, thumbnail = False, ""
 
+        if institution_id not in map_list:
+            # TODO kick off looking for URLs
+            raise OAIRecordException('No mapping found for institution', self.record)
+
+        if type == 'main' and not url:
+            raise OAIRecordException('No URL could be produced for this record', self.record)
+
         return thumbnail if type == "thumbnail" else url
 
     def check_if_url(self, key, value):
@@ -208,3 +226,8 @@ class Record:
                         urls[field] = url
         return urls
 
+
+class OAIRecordException(Exception):
+    def __init__(self, message, record={}):
+        self.message = message
+        self.record = record

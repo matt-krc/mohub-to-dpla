@@ -93,12 +93,20 @@ def write_report(datetimestr):
                 outf.write(f"       - {reason}: {count(records)}\n\n")
             inf.close()
 
+
 def write_file(out_path, metadata, id, name, skipped, skipped_records):
+    skipped_record_report = {}
+    for reason, skipped_record_list in skipped_records.items():
+        skipped_count = len(skipped_record_list)
+        skipped_record_report[reason] = {}
+        skipped_record_report[reason]['count'] = skipped_count
+        skipped_record_report[reason]['records'] = [record for record in skipped_record_list if record]
+
     out_data = {
         "institution": name,
         "count": len(metadata),
         "skipped": skipped,
-        "skipped_errors": skipped_records,
+        "skipped_errors": skipped_record_report,
         "records": metadata
     }
     out_path = out_path if out_path[-1] == '/' else out_path + '/'

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from record import Record
+from record import Record, OAIRecordException
 import time
 import sys
 import utils
@@ -176,21 +176,6 @@ class OAI:
                 resumption_token = None
             params['resumptionToken'] = resumption_token
             for record in records:
-                if not record.find('metadata') or not record.find('header'):
-                    skipped += 1
-                    if not record.find('metadata') and not record.find('header'):
-                        self.add_skipped_record("OAI header and metadata field both missing", str(record))
-                    elif not record.find('metadata'):
-                        if 'status' in record.find('header'):
-                            if record.find('header')['status'] == 'deleted':
-                                self.add_skipped_record("Deleted record", str(record))
-                            else:
-                                self.add_skipped_record("OAI metadata field missing", str(record))
-                        else:
-                            self.add_skipped_record("OAI metadata field missing", str(record))
-                    elif not record.find('header'):
-                        self.add_skipped_record("OAI header field missing", str(record))
-                    continue
                 if metadata_prefix == 'oai_dc' or metadata_prefix == 'oai_qdc':
                     metadata_prefix = '{}:dc'.format(metadata_prefix)
                 oai_data = {
@@ -202,38 +187,17 @@ class OAI:
                     "hub": self.hub,
                     "oai_url": self.url
                 }
+
                 try:
                     out_record = Record(record, oai_data)
-                except TypeError as e:
+                    mapped_out_record = out_record.map()
+                    out.append(mapped_out_record)
+                except OAIRecordException as e:
                     skipped += 1
-                    self.add_skipped_record("Error generating metadata record from OAI data", str(record))
+                    self.add_skipped_record(e.message, e.record)
                     continue
-                if out_record.url is False or not out_record.url:
-                    # if out_record.url is False:
-                    #     if not potential_urls:
-                    #         if not no_map:
-                    #             print("\n\nNo URL mapping could be established for institution.")
-                    #             print("Attempting to find metadata fields containing URLs.")
-                    #             potential_urls = out_record.search_for_urls()
-                    #             no_map = True
-                    #     else:
-                    #         for k, v in out_record.search_for_urls().items():
-                    #             if k not in potential_urls:
-                    #                 potential_urls[k] = v
-                    skipped += 1
-                    self.add_skipped_record("URL field not present in metadata record", str(record))
-                    continue
-                out_record = out_record.map()
-                if out_record:
-                    out.append(out_record)
-                else:
-                    self.add_skipped_record("error occurred during mapping process", str(record))
-                    skipped += 1
-        if potential_urls:
-            print("\n\nFound the following potential URL fields:")
-            for field, url in potential_urls.items():
-                print(f"{field}: {url}")
-            sys.exit()
+
         print(f"\n{skipped} items were skipped.")
         utils.write_file("files/institutions/", out, self.id, self.name, skipped, self.skipped_record_messages)
-        return out, skipped
+
+        return True
