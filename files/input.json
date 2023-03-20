@@ -1,0 +1,12 @@
+[
+    {
+        "institution": "Federal Reserve Bank of St. Louis",
+        "id": "frb",
+        "@id_prefix": "missouri--urn:data.mohistory.org:frbstl_fraser:oai:fraser.stlouisfed.org:title",
+        "url": "https://fraser.stlouisfed.org/oai",
+        "metadata_prefix": "mods",
+        "include": null,
+        "exclude": [],
+        "hub": "mohub"
+    }
+]

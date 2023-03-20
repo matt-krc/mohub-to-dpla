@@ -54,7 +54,10 @@ def main():
             feed = OAI(institution)
 
             # Crawl the feed and write output to JSON
-            feed.crawl()
+            data, skipped = feed.crawl()
+
+    print(f"Total records: {len(data)}")
+    print(f"Total skipped: {skipped}")
 
     if args.csv:
         utils.generate_csvs()

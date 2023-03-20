@@ -10,6 +10,7 @@ pytz==2021.1
 requests==2.25.1
 six==1.16.0
 soupsieve==2.2.1
-urllib3==1.26.4
+urllib3==1.26.5
 boto3~=1.24.15
 progressbar~=2.5
+python-dotenv==0.21.0
