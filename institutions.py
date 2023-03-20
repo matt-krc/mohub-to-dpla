@@ -13,7 +13,7 @@ import json
     }
 """
 
-infile = "./files/mohub_oai.json"
+infile = "./files/input.json"
 with open(infile, "r") as inf:
     data = json.load(inf)
 

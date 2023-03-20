@@ -1,0 +1,36 @@
+# This is a basic workflow that is manually triggered
+
+name: Crawl MoHub
+
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      institution:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Institution to crawl'
+        # Default value if no value is explicitly provided
+        default: 'frb'
+        # Input has to be provided for the workflow to run
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run crawl
+      working-directory: ./
+      run: python main.py -i ${{ github.event.inputs.institution }}
+      

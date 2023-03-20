@@ -3,7 +3,7 @@ env.py
 .idea
 files/*.json
 files/*.xlsx
-!files/mohub_oai.json
+!files/input.json
 files/mappings
 files/ingests
 files/institutions/*
