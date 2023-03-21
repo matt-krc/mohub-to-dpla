@@ -36,10 +36,10 @@ jobs:
       working-directory: ./
       run: python main.py -i $id
     - name: Upload crawl data to artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: $id_data
-          path: $id.json
+      uses: actions/upload-artifact@v3
+      with:
+        name: $id_data
+        path: $id.json
 
   crawl_msu:
     env:
@@ -62,10 +62,10 @@ jobs:
         working-directory: ./
         run: python main.py -i $id
       - name: Upload crawl data to artifact
-          uses: actions/upload-artifact@v3
-          with:
-            name: $id_data
-            path: $id.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: $id_data
+          path: $id.json
 
   crawl_kcpl1:
     env:
@@ -88,8 +88,8 @@ jobs:
         working-directory: ./
         run: python main.py -i $id
       - name: Upload crawl data to artifact
-          uses: actions/upload-artifact@v3
-          with:
-            name: $id_data
-            path: $id.json
+        uses: actions/upload-artifact@v3
+        with:
+          name: $id_data
+          path: $id.json
       
