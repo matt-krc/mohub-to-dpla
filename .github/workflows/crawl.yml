@@ -39,7 +39,7 @@ jobs:
         name: ${{ env.id }}_data
         path: ${{ env.id }}.json
 
- crawl_msu:
+  crawl_msu:
    env:
      id: msu
    runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_kcpl1:
+  crawl_kcpl1:
    env:
      id: kcpl1
    runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_kcpl2:
+  crawl_kcpl2:
    env:
      id: kcpl2
    runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_umkc:
+  crawl_umkc:
    env:
      id: umkc
    runs-on: ubuntu-latest
@@ -143,7 +143,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_stlpl:
+  crawl_stlpl:
    env:
      id: stlpl
    runs-on: ubuntu-latest
@@ -169,7 +169,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_shsm:
+  crawl_shsm:
    env:
      id: shsm
    runs-on: ubuntu-latest
@@ -195,7 +195,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_slu:
+  crawl_slu:
    env:
      id: slu
    runs-on: ubuntu-latest
@@ -221,7 +221,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_umsl:
+  crawl_umsl:
    env:
      id: umsl
    runs-on: ubuntu-latest
@@ -247,7 +247,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_sgcl:
+  crawl_sgcl:
    env:
      id: sgcl
    runs-on: ubuntu-latest
@@ -273,7 +273,7 @@ jobs:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
 
- crawl_wustl1:
+  crawl_wustl1:
    env:
      id: wustl1
    runs-on: ubuntu-latest
@@ -298,7 +298,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_wustl2:
+  crawl_wustl2:
    env:
      id: wustl2
    runs-on: ubuntu-latest
@@ -323,7 +323,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_lhl:
+  crawl_lhl:
    env:
      id: lhl
    runs-on: ubuntu-latest
@@ -348,7 +348,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_mhm:
+  crawl_mhm:
    env:
      id: mhm
    runs-on: ubuntu-latest
@@ -373,7 +373,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_drake:
+  crawl_drake:
    env:
      id: drake
    runs-on: ubuntu-latest
@@ -398,7 +398,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_grinnell:
+  crawl_grinnell:
    env:
      id: grinnell
    runs-on: ubuntu-latest
@@ -423,7 +423,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_uni:
+  crawl_uni:
    env:
      id: uni
    runs-on: ubuntu-latest
@@ -448,7 +448,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_isu:
+  crawl_isu:
    env:
      id: isu
    runs-on: ubuntu-latest
@@ -473,7 +473,7 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
- crawl_mdh:
+  crawl_mdh:
    env:
      id: mdh
    runs-on: ubuntu-latest
