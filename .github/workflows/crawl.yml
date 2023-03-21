@@ -34,8 +34,8 @@ jobs:
       working-directory: ./
       run: python main.py -i ${{ github.event.inputs.institution }}
     - name: Upload crawl data to artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ github.event.inputs.institution }}_data
-          path: files/institutions/${{ github.event.inputs.institution }}.json
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.event.inputs.institution }}_data
+        path: files/institutions/${{ github.event.inputs.institution }}.json
       
