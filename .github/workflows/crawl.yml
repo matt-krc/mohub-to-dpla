@@ -37,5 +37,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ github.event.inputs.institution }}_data
-        path: files/institutions/${{ github.event.inputs.institution }}.json
+        path: ${{ github.event.inputs.institution }}.json
       
