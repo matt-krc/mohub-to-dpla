@@ -38,8 +38,8 @@ jobs:
     - name: Upload crawl data to artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{id}}_data
-        path: ${{id}}.json
+        name: ${{ env.id }}_data
+        path: ${{ env.id }}.json
 
 #   crawl_msu:
 #     env:
