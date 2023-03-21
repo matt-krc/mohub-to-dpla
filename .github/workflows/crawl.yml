@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -33,4 +33,9 @@ jobs:
     - name: Run crawl
       working-directory: ./
       run: python main.py -i ${{ github.event.inputs.institution }}
+    - name: Upload crawl data to artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.inputs.institution }}_data
+          path: files/institutions/${{ github.event.inputs.institution }}.json
       

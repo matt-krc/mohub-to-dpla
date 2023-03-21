@@ -54,17 +54,18 @@ def main():
             feed = OAI(institution)
 
             # Crawl the feed and write output to JSON
-            data, skipped = feed.crawl()
+            data, skipped, skipped_messages = feed.crawl()
 
-    print(f"Total records: {len(data)}")
-    print(f"Total skipped: {skipped}")
+        print(f"Total records: {len(data)}")
+        print(f"Total skipped: {skipped}")
+        utils.write_file("files/institutions/", data, institution.id, institution.name, skipped, skipped_messages)
 
-    if args.csv:
-        utils.generate_csvs()
-
-    if not args.institutions:
-        # If crawling everything, generate compile output file and report
-        utils.compile(args.upload)
+    # if args.csv:
+    #     utils.generate_csvs()
+    #
+    # if not args.institutions:
+    #     # If crawling everything, generate compile output file and report
+    #     utils.compile(args.upload)
 
 
 if __name__ == "__main__":

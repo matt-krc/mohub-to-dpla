@@ -200,4 +200,4 @@ class OAI:
         print(f"\n{skipped} items were skipped.")
         # utils.write_file("files/institutions/", out, self.id, self.name, skipped, self.skipped_record_messages)
 
-        return out, skipped
+        return out, skipped, self.skipped_record_messages
