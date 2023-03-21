@@ -110,7 +110,7 @@ def write_file(out_path, metadata, id, name, skipped, skipped_records):
         "records": metadata
     }
     out_path = out_path if out_path[-1] == '/' else out_path + '/'
-    with open("{}{}.json".format(out_path, id), "w") as outf:
+    with open("{}.json".format(id), "w") as outf:
         json.dump(out_data, outf, indent=4)
 
     print(f"\n{len(metadata)} records written to {id}.json")

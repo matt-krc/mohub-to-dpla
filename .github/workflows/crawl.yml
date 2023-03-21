@@ -10,12 +10,14 @@ on:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'Institution to crawl'
         # Default value if no value is explicitly provided
-        default: 'frb'
+        default: 'all'
         # Input has to be provided for the workflow to run
         required: true
 
 jobs:
-  build:
+  crawl_frb:
+    env:
+      id: frb
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,12 +32,64 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run crawl
+    - name: crawl feed
       working-directory: ./
-      run: python main.py -i ${{ github.event.inputs.institution }}
+      run: python main.py -i $id
     - name: Upload crawl data to artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.inputs.institution }}_data
-          path: files/institutions/${{ github.event.inputs.institution }}.json
+          name: $id_data
+          path: $id.json
+
+  crawl_msu:
+    env:
+      id: msu
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: crawl feed
+        working-directory: ./
+        run: python main.py -i $id
+      - name: Upload crawl data to artifact
+          uses: actions/upload-artifact@v3
+          with:
+            name: $id_data
+            path: $id.json
+
+  crawl_kcpl1:
+    env:
+      id: kcpl1
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: crawl feed
+        working-directory: ./
+        run: python main.py -i $id
+      - name: Upload crawl data to artifact
+          uses: actions/upload-artifact@v3
+          with:
+            name: $id_data
+            path: $id.json
       
