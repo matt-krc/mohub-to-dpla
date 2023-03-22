@@ -106,7 +106,6 @@ def write_file(out_path, metadata, id, name, skipped, skipped_records):
         "institution": name,
         "count": len(metadata),
         "skipped": skipped,
-        "skipped_errors": skipped_record_report,
         "records": metadata
     }
     out_path = out_path if out_path[-1] == '/' else out_path + '/'
