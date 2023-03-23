@@ -19,8 +19,5 @@ jobs:
           if_no_artifact_found: fail
       - name: list directory contents
         working-directory: ./
-        run: ls -l
-      - name: cat file
-        working-directory: ./
-        run: cat frb_data
+        run: cd frb_data && ls -l
 
