@@ -5,11 +5,8 @@ on:
     # Inputs the workflow accepts.
     inputs:
       institution:
-        # Friendly description to be shown in the UI instead of 'name'
         description: 'Institution to crawl'
-        # Default value if no value is explicitly provided
         default: 'all'
-        # Input has to be provided for the workflow to run
         required: true
 
 jobs:

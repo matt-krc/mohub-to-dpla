@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import progressbar
 import boto3
 from dotenv import load_dotenv
+import zipfile
 
 load_dotenv()
 import sys
@@ -51,20 +52,25 @@ def compile(upload):
     :return:
     """
     # TODO: Upload compiled file to S3 directly
-    json_files = get_data_files()
+    data_files = glob("*_data.zip")
+    if len(data_files) < 1:
+        raise Exception("No files found to compile!")
     print("Compiling...")
     datetimestr = datetime.now().strftime("%Y%m%d%H%M%S")
     out = []
-    for file in json_files:
+    for file in data_files:
         print(file)
-        with open(file, "r") as inf:
+        with zipfile.ZipFile(file, "r") as zip_ref:
+            zip_ref.extractall("./")
+        json_file = file.replace(".zip", ".json")
+        with open(json_file, "r") as inf:
             data = json.load(inf)
         out.extend(data['records'])
         inf.close()
-    outfn = "./files/ingests/mohub_ingest_{}.json".format(datetimestr)
+    outfn = "mohub_ingest.json"
     outfn_l = f"{outfn}l"
-    with open(outfn, "w") as outf:
-        json.dump(out, outf, indent=4)
+    # with open(outfn, "w") as outf:
+    #     json.dump(out, outf, indent=4)
     # finish by writing to jsonl, as DPLA prefers
     with open(outfn_l, "w") as outf:
         for line in out:
