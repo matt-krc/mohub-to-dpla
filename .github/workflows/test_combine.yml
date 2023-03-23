@@ -14,8 +14,9 @@ jobs:
         with:
           name: output_file
           path: output.txt
-    
+
   download_file:
+    needs: create_file
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
