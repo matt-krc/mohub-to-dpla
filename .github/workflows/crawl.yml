@@ -1,13 +1,6 @@
 name: Crawl MoHub
 
-on:
-  workflow_dispatch:
-    # Inputs the workflow accepts.
-    inputs:
-      institution:
-        description: 'Institution to crawl'
-        default: 'all'
-        required: true
+on: workflow_dispatch
 
 jobs:
   crawl_frb:
@@ -445,31 +438,32 @@ jobs:
        with:
          name: ${{ env.id }}_data
          path: ${{ env.id }}.json
-  crawl_isu:
-   env:
-     id: isu
-   runs-on: ubuntu-latest
-   strategy:
-     matrix:
-       python-version: [ "3.8" ]
-   steps:
-     - uses: actions/checkout@v3
-     - name: Set up Python ${{ matrix.python-version }}
-       uses: actions/setup-python@v3
-       with:
-         python-version: ${{ matrix.python-version }}
-     - name: Install dependencies
-       run: |
-         python -m pip install --upgrade pip
-         pip install -r requirements.txt
-     - name: crawl feed
-       working-directory: ./
-       run: python main.py -i $id
-     - name: Upload crawl data to artifact
-       uses: actions/upload-artifact@v3
-       with:
-         name: ${{ env.id }}_data
-         path: ${{ env.id }}.json
+
+#  crawl_isu:
+#   env:
+#     id: isu
+#   runs-on: ubuntu-latest
+#   strategy:
+#     matrix:
+#       python-version: [ "3.8" ]
+#   steps:
+#     - uses: actions/checkout@v3
+#     - name: Set up Python ${{ matrix.python-version }}
+#       uses: actions/setup-python@v3
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install dependencies
+#       run: |
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#     - name: crawl feed
+#       working-directory: ./
+#       run: python main.py -i $id
+#     - name: Upload crawl data to artifact
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: ${{ env.id }}_data
+#         path: ${{ env.id }}.json
   crawl_mdh:
    env:
      id: mdh
