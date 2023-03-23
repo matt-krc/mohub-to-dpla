@@ -9,6 +9,7 @@ jobs:
       matrix:
         python-version: [ "3.8" ]
     steps:
+      - uses: actions/checkout@v3
       - name: Download crawls
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
@@ -19,4 +20,7 @@ jobs:
       - name: list directory contents
         working-directory: ./
         run: ls -l
+      - name: cat file
+        working-directory: ./
+        run: cat frb_data
 
