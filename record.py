@@ -88,6 +88,8 @@ class Record:
                 metadata["sourceResource"]["publisher"] = utils.format_metadata("publisher", self.parsed_metadata)
             elif institution_id == 'lhl':
                 metadata["sourceResource"]["rights"] = "NO COPYRIGHT - UNITED STATES\nThe organization that has made the Item available believes that the Item is in the Public Domain under the laws of the United States, but a determination was not made as to its copyright status under the copyright laws of other countries. The Item may not be in the Public Domain under the laws of other countries. Please refer to the organization that has made the Item available for more information."
+                metadata["rights"] = "http://rightsstatements.org/vocab/NoC-US/1.0/"
+                metadata["rightsCategory"] = "NO COPYRIGHT - UNITED STATES"
                 metadata["sourceResource"]["format"] = utils.format_metadata("type", self.parsed_metadata, "string")
                 metadata["sourceResource"]["creator"] = utils.format_metadata("contributor", self.parsed_metadata)
                 metadata["@id"] = "missouri--urn:data.mohistory.org:" + self.parsed_header["identifier"][0]
