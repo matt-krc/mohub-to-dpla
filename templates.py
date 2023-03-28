@@ -8,6 +8,7 @@ class Template:
         self.header = record.parsed_header
         self.url = record.url
         self.thumbnail = record.thumbnail
+        self.iiif_manifest = record.iiif_manifest
 
     def default(self):
         record = self.record
