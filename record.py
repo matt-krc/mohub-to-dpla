@@ -23,6 +23,7 @@ class Record:
 
         self.url: str = self.get_urls()
         self.thumbnail: str = self.get_urls("thumbnail")
+        self.iiif_manifest: str = self.get_urls("iiif")
 
     def __bool__(self):
         return type(self.parsed_record) == dict
@@ -184,9 +185,9 @@ class Record:
         metadata['header'] = header
 
         try:
-            url, thumbnail = map_list[institution_id](metadata)
+            url, thumbnail, iiif_manifest = map_list[institution_id](metadata)
         except KeyError:
-            url, thumbnail = False, ""
+            url, thumbnail, iiif_manifest = False, "", ""
 
         if institution_id not in map_list:
             # TODO kick off looking for URLs
@@ -195,7 +196,13 @@ class Record:
         if type == 'main' and not url:
             raise OAIRecordException('No URL could be produced for this record', self.record)
 
-        return thumbnail if type == "thumbnail" else url
+        if type == 'thumbnail':
+            return thumbnail
+        elif type == 'iiif':
+            return iiif_manifest
+        else:
+            return url
+
 
     def check_if_url(self, key, value):
         urls = {}

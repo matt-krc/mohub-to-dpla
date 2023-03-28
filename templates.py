@@ -38,6 +38,9 @@ class Template:
             "@id": self.record.institution_prefix + ":" + format_metadata("identifier", header, "string").split(":")[-1]
         }
 
+        if self.iiif_manifest:
+            metadata['iiifManifest'] = self.iiif_manifest
+
         return metadata
 
     def frb(self):

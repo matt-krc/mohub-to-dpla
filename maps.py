@@ -4,44 +4,45 @@ import utils
 def cdm(metadata):
     url = metadata["identifier"][-1]
     thumbnail = utils.generate_cdm_thumbnail(metadata["identifier"][-1])
-    return url, thumbnail
+    iiif_manifest = utils.generate_cdm_iiif_manifest(metadata["identifier"][-1])
+    return url, thumbnail, iiif_manifest
 
 
 def frb(metadata):
     url = utils.format_metadata("location.url", metadata, "string")
     thumbnail = utils.format_metadata("location.url_preview", metadata, "string")
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def kcpl1(metadata):
     url = metadata["relation"][0]
     thumbnail = ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def kcpl2(metadata):
     url = "https://kchistory.org/islandora/object/{}".format(metadata["identifier"][0])
     thumbnail = ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def um(metadata):
     url = f"https://dl.mospace.umsystem.edu/{metadata['institution_id']}/islandora/object/{metadata['identifier'][0]}"
     thumbnail = metadata["identifier.thumbnail"][0] if "identifier.thumbnail" in metadata else ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def wustl1(metadata):
     url = metadata["identifier"][0] if "identifier" in metadata else ""
     thumbnail = metadata["identifier"][1] if "identifier" in metadata else ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def wustl2(metadata):
     url = [i for i in metadata["identifier"] if "omeka.wustl.edu/omeka/items" in i][0]
     thumbnail = [t for t in metadata["identifier"] if "omeka.wustl.edu/omeka/files/" in t][0] if len(
         [t for t in metadata["identifier"] if "omeka.wustl.edu/omeka/files/" in t]) > 0 else ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def lhl(metadata):
@@ -49,7 +50,7 @@ def lhl(metadata):
           metadata['header']["identifier"][0].split(":")[-1]
     thumbnail = "https://catalog.lindahall.org/view/delivery/thumbnail/01LINDAHALL_INST/" + \
                 metadata['header']["identifier"][0].split(":")[-1]
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def grinnell(metadata):
@@ -66,7 +67,7 @@ def grinnell(metadata):
     else:
         url = ""
         thumbnail = ""
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def uni(metadata):
@@ -77,7 +78,7 @@ def uni(metadata):
             if d.split('.')[-1] in ['jpg', 'jpeg'] and d[:4] == 'http':
                 thumbnail = d
                 break
-    return url, thumbnail
+    return url, thumbnail, ""
 
 
 def isu(metadata):
@@ -92,4 +93,4 @@ def isu(metadata):
 
     thumbnail = metadata["identifier.thumbnail"]
 
-    return url, thumbnail
+    return url, thumbnail, ""

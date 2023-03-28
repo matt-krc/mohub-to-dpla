@@ -365,14 +365,26 @@ def format_metadata(field, metadata, return_format="list"):
 
 
 def generate_cdm_thumbnail(url):
+    base, collection, record_id = parse_cdm_url(url)
+    thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
+
+    return thumbnail
+
+def generate_cdm_iiif_manifest(url):
+    base, collection, record_id = parse_cdm_url(url)
+    iiif_manifest = f"{base}/iiif/info/{collection}/{record_id}/manifest.json"
+
+    return iiif_manifest
+
+def parse_cdm_url(url):
     try:
         collection = url.split("/")[url.split("/").index("collection") + 1]
     except ValueError as e:
         print(url)
         raise
+
     record_id = url.split("/")[-1]
     o = urlparse(url)
-    base = "{}://{}".format(o.scheme, o.netloc)
-    thumbnail = "{}/utils/getthumbnail/collection/{}/id/{}".format(base, collection, record_id)
+    base_url = "{}://{}".format(o.scheme, o.netloc)
 
-    return thumbnail
+    return base_url, collection, record_id
