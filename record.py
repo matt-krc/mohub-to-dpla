@@ -117,6 +117,16 @@ class Record:
         dpla_row["object"] = metadata["thumbnail"]
         dpla_row["sourceResource"] = metadata["sourceResource"]
 
+        # Conditional fields, not necessarily in every record
+        if "rights" in metadata:
+            dpla_row["rights"] = metadata["rights"]
+
+        if "rightsCategory" in metadata:
+            dpla_row["rightsCategory"] = metadata["rightsCategory"]
+
+        if "iiifManifest" in metadata:
+            dpla_row["iiifManifest"] = metadata["iiifManifest"]
+
         return dpla_row
 
     def is_deleted(self):
