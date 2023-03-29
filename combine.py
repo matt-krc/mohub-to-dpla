@@ -1,8 +1,11 @@
 from glob import glob
 import json
 
+def get_data():
+    return glob('*.json')
+
 def write_report():
-    data_files = glob("./*_data/*.json")
+    data_files = get_data()
     with open("report.txt", "w") as outf:
         for file in data_files:
             with open(file, 'r') as inf:
@@ -18,7 +21,7 @@ def write_report():
             inf.close()
 
 def compile():
-    data_files = glob("./*_data/*.json")
+    data_files = get_data()
     if len(data_files) < 1:
         raise Exception("No files found to compile!")
     print("Compiling...")
