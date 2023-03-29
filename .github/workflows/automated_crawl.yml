@@ -526,7 +526,7 @@ jobs:
     - name: Download crawls
       uses: actions/download-artifact@v3
       with:
-        name: '*_data'
+        path: ./
     - name: Combine files
       working-directory: ./
       run: python combine.py

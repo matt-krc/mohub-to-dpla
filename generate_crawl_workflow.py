@@ -86,7 +86,7 @@ data['jobs']['combine'] = {
             'name': 'Download crawls',
             'uses': 'actions/download-artifact@v3',
             'with': {
-                'name': '*_data'
+                'path': './'
             }
         },
         {
