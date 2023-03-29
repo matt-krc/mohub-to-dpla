@@ -129,7 +129,7 @@ data['jobs']['upload_s3'] = {
             }
         },
         {
-            'names': 'Upload to S3',
+            'name': 'Upload to S3',
             'env': {
                 'AWS_ACCESS_KEY': '${{ secrets.AWS_ACCESS_KEY }}',
                 'AWS_SECRET_KEY': '${{ secrets.AWS_SECRET_KEY }}',
