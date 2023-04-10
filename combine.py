@@ -2,7 +2,7 @@ from glob import glob
 import json
 
 def get_data():
-    return glob('*.json')
+    return glob('./*_data/*.json')
 
 def write_report():
     data_files = get_data()

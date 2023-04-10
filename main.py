@@ -3,7 +3,6 @@ import argparse
 import utils
 import requests
 import institutions
-import sys
 
 
 def main():
@@ -18,18 +17,7 @@ def main():
                         action="store_true", help="If set, converts JSON output to CSV.")
     parser.add_argument('--compile_only', '-co', default=False,
                         help="If set, script doesn't run a crawl, only compiles all data files into one.", action="store_true")
-    parser.add_argument('--upload', '-u', default=False, help="If set, uploads compiled file to S3.", action="store_true")
-    parser.add_argument('--count', default=False, help="Returns total amount of records from most recent ingest.", action="store_true")
     args = parser.parse_args()
-
-    # If we only want to compile existing data files into combined file, set this argument.
-    if args.compile_only:
-        utils.compile(args.upload)
-        return True
-
-    if args.count:
-        utils.return_count()
-        return True
 
     institutions_data = institutions.get()
 
@@ -60,14 +48,6 @@ def main():
 
         print(f"Total records: {len(data)}")
         print(f"Total skipped: {skipped}")
-
-
-    # if args.csv:
-    #     utils.generate_csvs()
-    #
-    # if not args.institutions:
-    #     # If crawling everything, generate compile output file and report
-    #     utils.compile(args.upload)
 
 
 if __name__ == "__main__":
