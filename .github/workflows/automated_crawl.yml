@@ -1,4 +1,4 @@
-name: Automated Crawl Mohub
+name: Automated Crawl Heartland Hub
 on: workflow_dispatch
 jobs:
   crawl_frb:
@@ -533,8 +533,8 @@ jobs:
     - name: Upload jsonl as artifact
       uses: actions/upload-artifact@v3
       with:
-        name: mohub_ingest
-        path: mohub_ingest.jsonl
+        name: hhub_ingest
+        path: hhub_ingest.jsonl
     - name: Upload ingest report as artifact
       uses: actions/upload-artifact@v3
       with:
@@ -561,7 +561,7 @@ jobs:
     - name: Download jsonl
       uses: actions/download-artifact@v3
       with:
-        name: mohub_ingest
+        name: hhub_ingest
     - name: Upload to S3
       env:
         AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}

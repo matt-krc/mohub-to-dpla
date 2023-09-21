@@ -66,8 +66,8 @@ def main():
     files = glob("./files/institutions/*.json")
     for file in files:
         print(file.split("/")[-1])
-        validate_data(file, "./files/mohub_dpla_ids.json", "@id")
-        # validate_data(file, "./files/mohub_dpla_titles.json", "sourceResource.title")
+        validate_data(file, "./files/hhub_dpla_ids.json", "@id")
+        # validate_data(file, "./files/hhub_dpla_titles.json", "sourceResource.title")
 
 
 

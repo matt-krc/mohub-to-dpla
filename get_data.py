@@ -11,11 +11,11 @@ def get_dpla():
         print(i)
         out.extend(DPLA().crawl_metadata(i, env.DPLA_KEY))
 
-    with open("./files/mohub_dpla.json", "w") as outf:
+    with open("./files/hhub_dpla.json", "w") as outf:
         json.dump(out, outf, indent=4)
 
 def get_identifiers():
-    with open('./files/mohub_dpla.json', 'r') as inf:
+    with open('./files/hhub_dpla.json', 'r') as inf:
         data = json.load(inf)
 
     ids = {}
@@ -32,7 +32,7 @@ def get_identifiers():
         json.dump(ids, outf, indent=4)
 
 def get_prefixes():
-    infs = glob('./files/mohub_dpla.json')
+    infs = glob('./files/hhub_dpla.json')
     for fn in infs:
         with open(fn, "r") as inf:
             data = json.load(inf)
@@ -50,7 +50,7 @@ def get_prefixes():
                 prefixes.append(prefix)
 
 def transform():
-    with open('./files/mohub_dpla.json', 'r') as inf:
+    with open('./files/hhub_dpla.json', 'r') as inf:
         data = json.load(inf)
     mhs = []
 

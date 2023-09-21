@@ -20,4 +20,4 @@ def upload_s3(fpath):
     up_progress.finish()
     print(f"finished upload to {now}/{fn}")
 
-upload_s3("mohub_ingest.jsonl")
+upload_s3("hhub_ingest.jsonl")

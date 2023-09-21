@@ -7,7 +7,7 @@
         "metadata_prefix": "mods",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Missouri State University",
@@ -17,7 +17,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": ["JohnsonLib"],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Kansas City Public Library",
@@ -27,7 +27,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Kansas City Public Library",
@@ -37,7 +37,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "University of Missouri - Kansas City",
@@ -47,7 +47,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Saint Louis Public Library",
@@ -57,7 +57,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "State Historical Society of Missouri",
@@ -67,7 +67,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Missouri Digital Heritage",
@@ -77,7 +77,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Saint Louis University",
@@ -87,7 +87,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": ["exorcism", "licenses"],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "University of Missouri - Saint Louis",
@@ -97,7 +97,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Springfield - Greene County Library",
@@ -107,7 +107,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Washington University in Saint Louis",
@@ -117,7 +117,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Washington University in Saint Louis",
@@ -127,7 +127,7 @@
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Linda Hall Library",
@@ -137,7 +137,7 @@
         "metadata_prefix": "oai_dc",
         "include": ["DPLA_Digital_Bib_DC"],
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Missouri History Museum",
@@ -147,7 +147,7 @@
         "metadata_prefix": "data_dump",
         "include": [],
         "exclude": [],
-        "hub": "mohub"
+        "hub": "hhub"
     },
     {
         "institution": "Drake University",
