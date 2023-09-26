@@ -63,7 +63,7 @@ class Institution:
         self.url: str = institution_data['url']
         self.id: str = institution_data['id']
         self.name: str = institution_data['institution'] if 'institution' in institution_data else ""
-        self.hub = institution_data['hub'] if 'hub' in institution_data else "hhub"
+        self.hub = institution_data['hub'] if 'hub' in institution_data else "mohub"
         self.include: list = institution_data['include'] if 'include' in institution_data else []
         self.exclude: list = institution_data['exclude'] if 'exclude' in institution_data else []
         self.id_prefix: str = self.generate_id_prefix()
@@ -75,7 +75,7 @@ class Institution:
         prefix_components = []
         institution_id = self.id
 
-        if self.hub == 'hhub':
+        if self.hub == 'mohub':
             prefix_components.append("missouri--urn")
             prefix_components.append("data.mohistory.org")
         elif self.hub == 'iowa':

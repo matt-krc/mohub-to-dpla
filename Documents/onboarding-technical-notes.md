@@ -4,8 +4,8 @@ Some context around the onboarding process as it pertains to the tech portion of
  
 Per the request from the group, here are some examples of how the mapping process operates in the context of the ingest pipeline:  
  
-- https://github.com/matt-krc/hhub-to-dpla/blob/master/maps.py
-- https://github.com/matt-krc/hhub-to-dpla/blob/master/record.py#L54
+- https://github.com/matt-krc/mohub-to-dpla/blob/master/maps.py
+- https://github.com/matt-krc/mohub-to-dpla/blob/master/record.py#L54
  
 Both of these highlight the kinds of mappings that have to be accounted for on a per-institution basis. While they may not be totally legible to those who aren't familiar with the Python programming language, I hope you can at least kind of get a sense of the logic there.  
  

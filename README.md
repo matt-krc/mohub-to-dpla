@@ -1,4 +1,4 @@
-# hhub-to-dpla
+# heartland-hub-to-dpla
 
 A set of scripts and classes to crawl OAI feeds and convert the data into DPLA-formatted metadata.
 

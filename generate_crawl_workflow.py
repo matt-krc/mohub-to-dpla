@@ -98,8 +98,8 @@ data['jobs']['combine'] = {
             'name': 'Upload jsonl as artifact',
             'uses': 'actions/upload-artifact@v3',
             'with': {
-                'name': 'hhub_ingest',
-                'path': 'hhub_ingest.jsonl'
+                'name': 'mohub_ingest',
+                'path': 'mohub_ingest.jsonl'
             }
         },
         {
@@ -125,7 +125,7 @@ data['jobs']['upload_s3'] = {
             'name': 'Download jsonl',
             'uses': 'actions/download-artifact@v3',
             'with': {
-                'name': 'hhub_ingest'
+                'name': 'mohub_ingest'
             }
         },
         {

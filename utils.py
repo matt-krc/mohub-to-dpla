@@ -67,7 +67,7 @@ def compile(upload):
             data = json.load(inf)
         out.extend(data['records'])
         inf.close()
-    outfn = "hhub_ingest.json"
+    outfn = "mohub_ingest.json"
     outfn_l = f"{outfn}l"
     # with open(outfn, "w") as outf:
     #     json.dump(out, outf, indent=4)
