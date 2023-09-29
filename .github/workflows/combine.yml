@@ -13,7 +13,6 @@ jobs:
     steps:
       - run: echo "Workflow succeeded!"
   combine:
-    needs: on-success
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,7 +28,6 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: crawl.yml
-          workflow_conclusion: success
           if_no_artifact_found: fail
       - name: Install dependencies
         run: |
