@@ -96,8 +96,7 @@ class Record:
                 metadata["@id"] = "missouri--urn:data.mohistory.org:" + self.parsed_header["identifier"][0]
             elif institution_id == 'isu':
                 metadata["sourceResource"]["rights"] = "CC0"
-                metadata["rights"] = "http://rightsstatements.org/vocab/NoC-US/1.0/"
-                metadata["rightsCategory"] = "NO COPYRIGHT - UNITED STATES"
+                metadata["rights"] = "http://creativecommons.org/publicdomain/zero/1.0/"
                 metadata["sourceResource"]["contributor"] = "Iowa State University. Special Collections and Archives"
                 if "coverage" in self.parsed_metadata.keys():
                     metadata["sourceResource"]["spatial"] = self.parsed_metadata["coverage"][0]
