@@ -6,7 +6,7 @@ import yaml
 institutions_data = institutions.get()
 
 exclude = ['isu']
-NAME = 'Automated Crawl Mohub'
+NAME = 'Automated Crawl Heartland Hub'
 ON = 'workflow_dispatch'
 STRATEGY = {
     'matrix': {

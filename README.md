@@ -1,8 +1,8 @@
-# mohub-to-dpla
+# heartland-hub-to-dpla
 
 A set of scripts and classes to crawl OAI feeds and convert the data into DPLA-formatted metadata.
 
-Right now the process is oriented towards MoHub and its member institutions but future work may focus on generalizing it to be more institution-agnostic.
+Right now the process is oriented towards Heartland Hub and its member institutions but future work may focus on generalizing it to be more institution-agnostic.
 
 # Main Object Classes
 
@@ -38,7 +38,7 @@ Right now the process is oriented towards MoHub and its member institutions but 
   "id": // unique identifier for the institution (required),
   "url": // URL to the OAI endpoint (required),
   "institution": // the full name of the institution (if not set, will default to name set in the 'repositoryName' field in the OAI Identify endpoint),
-  "@id_prefix": // an important legacy identifier used by DPLA in certain metadata fields, drawn from previous MoHub ingests. If not set manually, script includes rules for generating one based on id field
+  "@id_prefix": // an important legacy identifier used by DPLA in certain metadata fields, drawn from previous Heartland Hub ingests. If not set manually, script includes rules for generating one based on id field
   "metadata_prefix": // Preferred metadata prefix for the institution (defaults to oai_dc if none set),
   "include": // An array of specific collection names to include. If present, only collections listed will be crawled.
   "exclude": // An array of specific collection names to exclude. If present, all but these collections will be crawled.
@@ -47,7 +47,7 @@ Right now the process is oriented towards MoHub and its member institutions but 
 	
 # Run the Pipeline
 
-`python main.py` sets the whole aggregation process in motion for MoHub, first importing the institution data, then crawling OAI feed objects and outputting JSON data for ingest to DPLA
+`python main.py` sets the whole aggregation process in motion for Heartland Hub, first importing the institution data, then crawling OAI feed objects and outputting JSON data for ingest to DPLA
 
 # Experimental Feature(s)
 
@@ -58,5 +58,5 @@ Right now the process is oriented towards MoHub and its member institutions but 
 - `init.py` creates necessary files and directories for the pipeline to function properly
 - `utils.py` contains helper functions for various transformations in the main classes and functions
 - `dpla.py` contains functions to interact with and get data from the DPLA API. It was used during the initial development phase to make sure data was being matched up to previous ingests, but is not used in any of the main crawl functions.
-- `get_data.py` similarly is not used in the main process, but was used during the initial building process to compare data from previous MoHub ingests.
+- `get_data.py` similarly is not used in the main process, but was used during the initial building process to compare data from previous Heartland Hub ingests.
 - `validate.py` contains function that were used in building the process to compare data. It's not really used.

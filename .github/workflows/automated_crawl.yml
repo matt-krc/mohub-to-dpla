@@ -1,4 +1,4 @@
-name: Automated Crawl Mohub
+name: Automated Crawl Heartland Hub
 on: workflow_dispatch
 jobs:
   crawl_frb:
@@ -27,7 +27,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_msu:
     env:
       id: msu
@@ -108,7 +108,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_umkc:
     env:
       id: umkc
@@ -135,7 +135,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_stlpl:
     env:
       id: stlpl
@@ -162,7 +162,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_shsm:
     env:
       id: shsm
@@ -189,7 +189,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_mdh:
     env:
       id: mdh
@@ -216,7 +216,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_slu:
     env:
       id: slu
@@ -243,7 +243,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_umsl:
     env:
       id: umsl
@@ -270,7 +270,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_sgcl:
     env:
       id: sgcl
@@ -297,7 +297,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_wustl1:
     env:
       id: wustl1
@@ -324,7 +324,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_wustl2:
     env:
       id: wustl2
@@ -351,7 +351,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_lhl:
     env:
       id: lhl
@@ -378,7 +378,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_mhm:
     env:
       id: mhm
@@ -405,7 +405,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_drake:
     env:
       id: drake
@@ -432,7 +432,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_grinnell:
     env:
       id: grinnell
@@ -459,7 +459,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   crawl_uni:
     env:
       id: uni
@@ -486,7 +486,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.id }}_data
-        path: ${{ env.id}}.json
+        path: ${{ env.id }}.json
   combine:
     needs:
     - crawl_frb

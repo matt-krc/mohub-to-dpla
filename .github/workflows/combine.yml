@@ -2,7 +2,7 @@ name: Combine Data and Upload
 
 on:
   workflow_run:
-    workflows: [Crawl MoHub]
+    workflows: [Crawl Heartland Hub]
     types:
       - completed
 
