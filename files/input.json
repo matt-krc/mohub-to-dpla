@@ -43,7 +43,7 @@
         "institution": "University of Missouri - Kansas City",
         "id": "umkc",
         "@id_prefix": "missouri--urn:data.mohistory.org:umkc_dl:oai:dl.mospace.umsystem.edu/umkc/",
-        "url": "https://dl.mospace.umsystem.edu/umkc/oai2",
+        "url": " https://digital.library.umkc.edu/oai/request",
         "metadata_prefix": "oai_dc",
         "include": null,
         "exclude": [],
