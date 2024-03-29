@@ -138,6 +138,7 @@ class OAI:
             params["set"] = self.include
 
         timeouts = 0
+        server_errors = 0
         skipped = 0
         potential_urls = {}
         no_map = False
@@ -151,14 +152,19 @@ class OAI:
             except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as e:
                 timeouts += 1
                 print("\nRequest timed out. Waiting 5 seconds and trying again. Attempt {}".format(timeouts))
+                time.sleep(5)
                 if timeouts == 5:
                     print("\nRequest has timed out 5 times. Stopping harvest.")
                     break
                 continue
             if res.status_code // 100 == 5:
+                server_errors += 1
                 print("\nServer error. Waiting 5 seconds and trying request again.")
                 print(res.status_code)
                 time.sleep(5)
+                if server_errors == 5:
+                    print("\nFeed has returned a server error 5 times. Stopping crawl.")
+                    break
                 continue
 
             # OAI doesn't like it if you're using a resumption token with a metadataPrefix or set param, so we delete it after initial request
