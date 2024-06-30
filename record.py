@@ -177,7 +177,7 @@ class Record:
 
             if element.name == 'name':
                 # TODO concatenate namePartDate if it exists
-                return [element.find('namepart').getText()]
+                return [element.find('namePart').getText()]
 
             if el.name == "coverage":
                 # Coverage gets "counted" as subject
