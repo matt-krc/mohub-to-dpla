@@ -1,10 +1,10 @@
 name: Combine Data and Upload
 
-on: workflow_dispatch
-#  workflow_run:
-#    workflows: [Crawl Heartland Hub]
-#    types:
-#      - completed
+on:
+  workflow_run:
+    workflows: [Crawl Heartland Hub]
+    types:
+      - completed
 
 jobs:
   on-success:
