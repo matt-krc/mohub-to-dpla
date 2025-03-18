@@ -37,12 +37,12 @@ jobs:
         working-directory: ./
         run: python combine.py
       - name: Upload jsonl to artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mohub_ingest
           path: mohub_ingest.jsonl
       - name: Upload ingest report to artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ingest_report
           path: report.txt
